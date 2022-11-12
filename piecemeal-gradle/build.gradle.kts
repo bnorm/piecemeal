@@ -9,7 +9,7 @@ dependencies {
 }
 
 buildConfig {
-  val project = project(":kotlin-ir-plugin")
+  val project = project(":piecemeal-plugin")
   packageName(project.group.toString())
   buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${rootProject.extra["kotlin_plugin_id"]}\"")
   buildConfigField("String", "KOTLIN_PLUGIN_GROUP", "\"${project.group}\"")
@@ -19,11 +19,11 @@ buildConfig {
 
 gradlePlugin {
   plugins {
-    create("kotlinIrPluginTemplate") {
+    create("piecemeal") {
       id = rootProject.extra["kotlin_plugin_id"] as String
-      displayName = "Kotlin Ir Plugin Template"
-      description = "Kotlin Ir Plugin Template"
-      implementationClass = "com.bnorm.template.TemplateGradlePlugin"
+      displayName = "Piecemeal"
+      description = "Piecemeal"
+      implementationClass = "com.bnorm.piecemeal.PiecemealGradlePlugin"
     }
   }
 }
