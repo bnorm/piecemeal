@@ -18,43 +18,34 @@ package com.bnorm.piecemeal
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import kotlin.test.assertEquals
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class IrPluginTest {
   @Test
   fun `IR plugin success`() {
     val result = compile(
-      sourceFile = SourceFile.kotlin(
-        "main.kt", """
-fun main() {
-  println(debug())
-}
+      SourceFile.kotlin(
+        "main.kt", """import com.bnorm.piecemeal.Piecemeal
 
-fun debug() = "Hello, World!"
+@Piecemeal
+class First
+
+@Piecemeal
+class Second
+
+fun box(): String {
+    val result1 = First.Builder()
+    if (result1 is First.Builder) return "Error: ${'$'}result1"
+
+    val result2 = Second().newBuilder()
+    if (result2 is Second.Builder) return "Error: ${'$'}result2"
+
+    return "OK"
+}
 """
       )
     )
     assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
   }
-}
-
-fun compile(
-  sourceFiles: List<SourceFile>,
-  plugin: ComponentRegistrar = PiecemealComponentRegistrar(),
-): KotlinCompilation.Result {
-  return KotlinCompilation().apply {
-    sources = sourceFiles
-    useIR = true
-    compilerPlugins = listOf(plugin)
-    inheritClassPath = true
-  }.compile()
-}
-
-fun compile(
-  sourceFile: SourceFile,
-  plugin: ComponentRegistrar = PiecemealComponentRegistrar(),
-): KotlinCompilation.Result {
-  return compile(listOf(sourceFile), plugin)
 }

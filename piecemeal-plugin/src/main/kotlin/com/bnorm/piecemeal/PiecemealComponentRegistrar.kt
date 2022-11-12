@@ -16,34 +16,26 @@
 
 package com.bnorm.piecemeal
 
+import com.bnorm.piecemeal.fir.PiecemealFirExtensionRegistrar
+import com.bnorm.piecemeal.ir.PiecemealIrGenerationExtension
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.com.intellij.mock.MockProject
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 
 @AutoService(ComponentRegistrar::class)
-class PiecemealComponentRegistrar(
-  private val defaultString: String,
-  private val defaultFile: String,
-) : ComponentRegistrar {
+class PiecemealComponentRegistrar : ComponentRegistrar {
 
-  @Suppress("unused") // Used by service loader
-  constructor() : this(
-    defaultString = "Hello, World!",
-    defaultFile = "file.txt"
-  )
+  override val supportsK2: Boolean
+    get() = true
 
   override fun registerProjectComponents(
     project: MockProject,
-    configuration: CompilerConfiguration
+    configuration: CompilerConfiguration,
   ) {
-    val messageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-    val string = configuration.get(PiecemealCommandLineProcessor.ARG_STRING, defaultString)
-    val file = configuration.get(PiecemealCommandLineProcessor.ARG_FILE, defaultFile)
-
-    IrGenerationExtension.registerExtension(project, PiecemealIrGenerationExtension(messageCollector, string, file))
+    FirExtensionRegistrar.registerExtension(project, PiecemealFirExtensionRegistrar())
+    IrGenerationExtension.registerExtension(project, PiecemealIrGenerationExtension())
   }
 }

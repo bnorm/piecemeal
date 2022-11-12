@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
+@Suppress("unused") // Used via reflection
 class PiecemealGradlePlugin : KotlinCompilerPluginSupportPlugin {
   override fun apply(target: Project): Unit = with(target) {
     extensions.create("piecemeal", PiecemealGradleExtension::class.java)
@@ -42,12 +43,11 @@ class PiecemealGradlePlugin : KotlinCompilerPluginSupportPlugin {
     kotlinCompilation: KotlinCompilation<*>
   ): Provider<List<SubpluginOption>> {
     val project = kotlinCompilation.target.project
-    val extension = project.extensions.getByType(PiecemealGradleExtension::class.java)
-    return project.provider {
-      listOf(
-        SubpluginOption(key = "string", value = extension.stringProperty.get()),
-        SubpluginOption(key = "file", value = extension.fileProperty.get().asFile.path),
-      )
+
+    kotlinCompilation.dependencies {
+      compileOnly("${BuildConfig.SUPPORT_LIBRARY_GROUP}:${BuildConfig.SUPPORT_LIBRARY_NAME}:${BuildConfig.SUPPORT_LIBRARY_VERSION}")
     }
+
+    return project.provider { emptyList() }
   }
 }
