@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.bnorm.piecemeal.ir
+package com.bnorm.piecemeal.plugin.ir
 
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.util.dump
+import org.jetbrains.kotlin.ir.util.dumpKotlinLike
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 
 class PiecemealIrGenerationExtension : IrGenerationExtension {
@@ -27,8 +29,12 @@ class PiecemealIrGenerationExtension : IrGenerationExtension {
       PiecemealBodyGenerator(pluginContext),
     )
 
+
     for (transformer in transformers) {
       moduleFragment.acceptChildrenVoid(transformer)
     }
+
+    println(moduleFragment.dump())
+//    println(moduleFragment.dumpKotlinLike())
   }
 }

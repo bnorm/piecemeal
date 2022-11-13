@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.bnorm.piecemeal
+package com.bnorm.piecemeal.plugin.fir
 
-import org.jetbrains.kotlin.GeneratedDeclarationKey
+import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 
-object PiecemealKey : GeneratedDeclarationKey() {
-  override fun toString(): String {
-    return "PiecemealKey"
+class PiecemealFirExtensionRegistrar : FirExtensionRegistrar() {
+  override fun ExtensionRegistrarContext.configurePlugin() {
+    +::PiecemealFirGenerationExtension
   }
 }

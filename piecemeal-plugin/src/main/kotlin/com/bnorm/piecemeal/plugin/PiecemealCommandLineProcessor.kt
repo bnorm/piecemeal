@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.bnorm.piecemeal
+package com.bnorm.piecemeal.plugin
 
+import com.bnorm.piecemeal.BuildConfig
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
