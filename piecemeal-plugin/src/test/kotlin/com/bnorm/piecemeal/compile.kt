@@ -28,6 +28,7 @@ fun compile(
   return KotlinCompilation().apply {
     sources = sourceFiles
     useK2 = true
+    supportsK2 = true
     compilerPlugins = listOf(PiecemealComponentRegistrar())
     inheritClassPath = true
   }.compile()
