@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 
 class PiecemealFirExtensionRegistrar : FirExtensionRegistrar() {
   override fun ExtensionRegistrarContext.configurePlugin() {
+    +::PiecemealFirStatusTransformerExtension
     +::PiecemealFirGenerationExtension
   }
 }
