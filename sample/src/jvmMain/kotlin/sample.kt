@@ -21,4 +21,9 @@ fun main() {
     .setAge(35)
     .build()
   println(me)
+
+  val jane = Person {
+    name = "Jane"
+  }
+  println(jane)
 }

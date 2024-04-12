@@ -31,7 +31,5 @@ class PiecemealIrGenerationExtension : IrGenerationExtension {
     for (transformer in transformers) {
       moduleFragment.acceptChildrenVoid(transformer)
     }
-
-    println(moduleFragment.dump())
   }
 }

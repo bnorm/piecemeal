@@ -19,32 +19,12 @@ package com.bnorm.piecemeal.plugin.fir
 import com.bnorm.piecemeal.plugin.Piecemeal
 import com.bnorm.piecemeal.plugin.toJavaSetter
 import org.jetbrains.kotlin.fir.FirSession
-import org.jetbrains.kotlin.fir.extensions.ExperimentalTopLevelDeclarationsGenerationApi
-import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
-import org.jetbrains.kotlin.fir.extensions.FirDeclarationPredicateRegistrar
-import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
-import org.jetbrains.kotlin.fir.extensions.NestedClassGenerationContext
-import org.jetbrains.kotlin.fir.extensions.predicateBasedProvider
-import org.jetbrains.kotlin.fir.plugin.createConstructor
-import org.jetbrains.kotlin.fir.plugin.createMemberFunction
-import org.jetbrains.kotlin.fir.plugin.createMemberProperty
-import org.jetbrains.kotlin.fir.plugin.createNestedClass
+import org.jetbrains.kotlin.fir.extensions.*
+import org.jetbrains.kotlin.fir.plugin.*
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
-import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirValueParameterSymbol
-import org.jetbrains.kotlin.fir.types.ConeNullability
-import org.jetbrains.kotlin.fir.types.constructStarProjectedType
-import org.jetbrains.kotlin.fir.types.typeContext
-import org.jetbrains.kotlin.fir.types.withNullability
-import org.jetbrains.kotlin.name.CallableId
-import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.name.SpecialNames
+import org.jetbrains.kotlin.fir.symbols.impl.*
+import org.jetbrains.kotlin.fir.types.*
+import org.jetbrains.kotlin.name.*
 
 @OptIn(ExperimentalTopLevelDeclarationsGenerationApi::class)
 class PiecemealFirGenerationExtension(
@@ -74,9 +54,9 @@ class PiecemealFirGenerationExtension(
     callableId: CallableId,
     context: MemberGenerationContext?,
   ): List<FirNamedFunctionSymbol> {
-    val owner = context?.owner ?: return emptyList()
 
     if (callableId.callableName == NEW_BUILDER_FUN_NAME) {
+      val owner = context?.owner ?: return emptyList()
       val classId = callableId.classId ?: return emptyList()
       val builderClassSymbol = session.findClassSymbol(classId.builder) ?: return emptyList()
       val function = createMemberFunction(
@@ -87,6 +67,7 @@ class PiecemealFirGenerationExtension(
       )
       return listOf(function.symbol)
     } else if (callableId.classId in builderClassIds) {
+      val owner = context?.owner ?: return emptyList()
       val piecemealClass = owner.outerClass!!
       val function = if (callableId.callableName == BUILD_FUN_NAME) {
         createMemberFunction(
@@ -109,7 +90,28 @@ class PiecemealFirGenerationExtension(
       }
       return listOf(function.symbol)
     } else {
-      return emptyList()
+      val piecemealClass = piecemealClasses.singleOrNull {
+        it.name == callableId.callableName && it.classId.packageFqName == callableId.packageName
+      }
+
+      if (piecemealClass != null) {
+        val builderClassSymbol = session.findClassSymbol(piecemealClass.classId.builder) ?: return emptyList()
+        val fn1 = ClassId(FqName("kotlin"), Name.identifier("Function1"))
+        val builderType = fn1.createConeType(
+          session,
+          arrayOf(
+            builderClassSymbol.constructStarProjectedType(),
+            session.builtinTypes.unitType.type,
+          )
+        ).withAttributes(ConeAttributes.create(listOf(CompilerConeAttributes.ExtensionFunctionType)))
+
+        val function = createTopLevelFunction(Piecemeal.Key, callableId, piecemealClass.constructStarProjectedType()) {
+          valueParameter(Name.identifier("builder"), builderType)
+        }
+        return listOf(function.symbol)
+      } else {
+        return emptyList()
+      }
     }
   }
 
@@ -163,8 +165,9 @@ class PiecemealFirGenerationExtension(
   }
 
   override fun getTopLevelCallableIds(): Set<CallableId> {
-    // TODO add DSL like builder function
-    return super.getTopLevelCallableIds()
+    // TODO what about nested classes?
+    val values = piecemealClasses.map { CallableId(it.classId.packageFqName, it.classId.shortClassName) }.toSet()
+    return values
   }
 
   private fun getPrimaryConstructorValueParameters(classSymbol: FirClassSymbol<*>): List<FirValueParameterSymbol> {

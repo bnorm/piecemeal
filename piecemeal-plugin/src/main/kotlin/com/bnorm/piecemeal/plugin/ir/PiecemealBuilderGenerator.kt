@@ -32,8 +32,12 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrSimpleType
+import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.util.deepCopyWithoutPatchingParents
+import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.isTopLevel
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
@@ -47,6 +51,7 @@ class PiecemealBuilderGenerator(
 
   // TODO support class type parameters
   // TODO remove defaults from primary constructor?
+  // TODO some things JvmSynthetic
 
   override fun visitElement(element: IrElement) {
     when (element) {
@@ -64,6 +69,7 @@ class PiecemealBuilderGenerator(
         Name.identifier("build") -> generateBuildFunction(declaration)
         else -> when {
           declaration.isPropertyAccessor -> return
+          declaration.isTopLevel -> generateBuilderFunction(declaration)
           else -> generateBuilderSetter(declaration)
         }
       }
@@ -199,6 +205,44 @@ class PiecemealBuilderGenerator(
         builderClass.symbol,
         builderType,
       )
+    }
+  }
+
+  /**
+   * ```kotlin
+   * fun Person(builder: Person.Builder.() -> Unit): Person {
+   *     val tmp = Builder()
+   *     tmp.builder()
+   *     return tmp
+   * }
+   * ```
+   */
+  private fun generateBuilderFunction(function: IrSimpleFunction): IrBody? {
+    val builderLambda = function.valueParameters.single()
+    val builderType = (builderLambda.type as IrSimpleType).arguments[0] as IrType
+    val builderClass = builderType.classifierOrNull?.owner as? IrClass ?: return null
+    val builderConstructor = builderClass.primaryConstructor ?: return null
+
+    val invoke = builderLambda.type.classOrNull!!.functions
+      .filter { !it.owner.isFakeOverride } // TODO best way to find single access method?
+      .single()
+
+    val build = builderClass.functions
+      .filter { it.name.asString() == "build" } // TODO best way to find build method?
+      .single()
+
+    val irBuilder = DeclarationIrBuilder(context, function.symbol)
+    return irBuilder.irBlockBody {
+      val tmp = irTemporary(value = irCall(builderConstructor))
+
+      +irCall(invoke).apply {
+        dispatchReceiver = irGet(builderLambda)
+        putValueArgument(0, irGet(tmp))
+      }
+
+      +irReturn(irCall(build).apply {
+        dispatchReceiver = irGet(tmp)
+      })
     }
   }
 

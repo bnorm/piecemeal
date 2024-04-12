@@ -82,7 +82,9 @@ class IrPluginTest {
 
 @JvmSynthetic // Hide from Java callers who should use Builder.
 fun Person(builder: Person.Builder.() -> Unit): Person {
-    return Person.Builder().apply(builder).build()
+    val tmp = Person.Builder()
+    builder.invoke(tmp)
+    return tmp.build()
 }
 """
       )
@@ -101,7 +103,9 @@ class Person(
     val name: String,
     val nickname: String? = name,
     val age: Int = 0,
-)
+) {
+  fun mutate(block: Person.() -> Unit) {}
+}
 
 fun person1(): Person {
     return Person.Builder()
