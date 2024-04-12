@@ -17,6 +17,7 @@
 package com.bnorm.piecemeal.plugin.fir
 
 import com.bnorm.piecemeal.plugin.Piecemeal
+import com.bnorm.piecemeal.plugin.toJavaSetter
 import org.jetbrains.kotlin.builtins.StandardNames
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.EffectiveVisibility
@@ -35,13 +36,14 @@ import org.jetbrains.kotlin.fir.declarations.builder.buildProperty
 import org.jetbrains.kotlin.fir.declarations.builder.buildRegularClass
 import org.jetbrains.kotlin.fir.declarations.builder.buildSimpleFunction
 import org.jetbrains.kotlin.fir.declarations.builder.buildValueParameter
+import org.jetbrains.kotlin.fir.declarations.impl.FirDefaultPropertyGetter
+import org.jetbrains.kotlin.fir.declarations.impl.FirDefaultPropertySetter
 import org.jetbrains.kotlin.fir.declarations.impl.FirResolvedDeclarationStatusImpl
 import org.jetbrains.kotlin.fir.declarations.origin
 import org.jetbrains.kotlin.fir.expressions.builder.buildConstExpression
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationPredicateRegistrar
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
-import org.jetbrains.kotlin.fir.extensions.predicate.annotated
 import org.jetbrains.kotlin.fir.extensions.predicateBasedProvider
 import org.jetbrains.kotlin.fir.moduleData
 import org.jetbrains.kotlin.fir.resolve.defaultType
@@ -65,7 +67,6 @@ import org.jetbrains.kotlin.fir.types.typeContext
 import org.jetbrains.kotlin.fir.types.withNullability
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 import org.jetbrains.kotlin.types.ConstantValueKind
@@ -74,8 +75,6 @@ class PiecemealFirGenerationExtension(
   session: FirSession,
 ) : FirDeclarationGenerationExtension(session) {
   companion object {
-    private val PIECEMEAL_ANNOTATION_PREDICATE = annotated(FqName("com.bnorm.piecemeal.Piecemeal"))
-
     private val BUILDER_CLASS_NAME = Name.identifier("Builder")
 
     private val NEW_BUILDER_FUN_NAME = Name.identifier("newBuilder")
@@ -86,7 +85,7 @@ class PiecemealFirGenerationExtension(
 
   // Symbols for classes which have Piecemeal annotation
   private val piecemealClasses by lazy {
-    session.predicateBasedProvider.getSymbolsByPredicate(PIECEMEAL_ANNOTATION_PREDICATE)
+    session.predicateBasedProvider.getSymbolsByPredicate(Piecemeal.ANNOTATION_PREDICATE)
       .filterIsInstance<FirRegularClassSymbol>().toSet()
   }
 
@@ -109,8 +108,8 @@ class PiecemealFirGenerationExtension(
       val function = if (callableId.callableName == BUILD_FUN_NAME) {
         buildBuilderBuildFunction(callableId, builderClassSymbol.outerClass!!.defaultType())
       } else {
-        val parameter =
-          getPrimaryConstructorValueParameters(builderClassSymbol.outerClass!!).single { it.name == callableId.callableName }
+        val parameter = getPrimaryConstructorValueParameters(builderClassSymbol.outerClass!!)
+          .singleOrNull { it.name.toJavaSetter() == callableId.callableName } ?: return emptyList()
         buildBuilderPropertyFunction(
           callableId,
           parameter.resolvedReturnTypeRef,
@@ -123,13 +122,27 @@ class PiecemealFirGenerationExtension(
     }
   }
 
+  override fun generateProperties(callableId: CallableId, context: MemberGenerationContext?): List<FirPropertySymbol> {
+    if (callableId.classId in builderClassIds) {
+      val builderClassSymbol = context?.owner ?: return emptyList()
+
+      val parameter = getPrimaryConstructorValueParameters(builderClassSymbol.outerClass!!)
+        .singleOrNull { it.name == callableId.callableName } ?: return emptyList()
+      val property = buildBuilderProperty(callableId, parameter.resolvedReturnType)
+
+      return listOf(property.symbol)
+    }
+
+    return emptyList()
+  }
+
   override fun generateClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
     if (classId.shortClassName != BUILDER_CLASS_NAME) return null
     val outerClassId = classId.outerClassId ?: return null
     val outerClass = piecemealClasses.singleOrNull { it.classId == outerClassId } ?: return null
 
     val parameters = getPrimaryConstructorValueParameters(outerClass)
-    return buildBuilderClass(classId, parameters).symbol
+    return buildBuilderClass(classId).symbol
   }
 
   override fun generateConstructors(context: MemberGenerationContext): List<FirConstructorSymbol> {
@@ -143,11 +156,18 @@ class PiecemealFirGenerationExtension(
       classSymbol in piecemealClasses -> setOf(NEW_BUILDER_FUN_NAME)
       classSymbol.classId in builderClassIds -> {
         val parameters = getPrimaryConstructorValueParameters(classSymbol.outerClass!!)
-        setOf(SpecialNames.INIT, BUILD_FUN_NAME) + parameters.map { it.name }
+        (parameters.map { it.name } +
+          parameters.map { it.name.toJavaSetter() } +
+          setOf(SpecialNames.INIT, BUILD_FUN_NAME)).toSet()
       }
 
       else -> emptySet()
     }
+  }
+
+  override fun getTopLevelCallableIds(): Set<CallableId> {
+    // TODO add DSL like builder function
+    return super.getTopLevelCallableIds()
   }
 
   private fun getPrimaryConstructorValueParameters(classSymbol: FirClassSymbol<*>): List<FirValueParameterSymbol> {
@@ -166,7 +186,7 @@ class PiecemealFirGenerationExtension(
   }
 
   override fun FirDeclarationPredicateRegistrar.registerPredicates() {
-    register(PIECEMEAL_ANNOTATION_PREDICATE)
+    register(Piecemeal.ANNOTATION_PREDICATE)
   }
 }
 
@@ -175,40 +195,7 @@ private fun FirSession.findClassSymbol(classId: ClassId) =
 
 private fun FirDeclarationGenerationExtension.buildBuilderClass(
   classId: ClassId,
-  properties: List<FirValueParameterSymbol>,
 ): FirRegularClass {
-  fun buildProperty(property: FirValueParameterSymbol): FirProperty {
-    val propertyTypeRef = buildResolvedTypeRef {
-      type = property.resolvedReturnType.withNullability(ConeNullability.NULLABLE, session.typeContext)
-    }
-    val propertySymbol = FirPropertySymbol(property.name)
-    val status =
-      FirResolvedDeclarationStatusImpl(Visibilities.Private, Modality.FINAL, EffectiveVisibility.PrivateInClass)
-    val built = buildProperty {
-      moduleData = session.moduleData
-      origin = Piecemeal.Key.origin
-      this.status = status
-      returnTypeRef = propertyTypeRef
-      name = property.name
-      symbol = propertySymbol
-      isVar = true
-      isLocal = true
-      backingField = buildBackingField {
-        moduleData = session.moduleData
-        origin = Piecemeal.Key.origin
-        returnTypeRef = propertyTypeRef
-        this.status = status
-        name = StandardNames.BACKING_FIELD
-        symbol = FirBackingFieldSymbol(CallableId(name))
-        this.propertySymbol = propertySymbol
-        this.initializer = buildConstExpression(null, ConstantValueKind.Null, null)
-        this.isVar = true
-        this.isVal = false
-      }
-    }
-    return built
-  }
-
   val built = buildRegularClass {
     resolvePhase = FirResolvePhase.BODY_RESOLVE
     moduleData = session.moduleData
@@ -219,7 +206,7 @@ private fun FirDeclarationGenerationExtension.buildBuilderClass(
     name = classId.shortClassName
     symbol = FirRegularClassSymbol(classId)
     superTypeRefs += session.builtinTypes.anyType
-    declarations.addAll(properties.map { buildProperty(it) })
+//    declarations.addAll(properties.map { buildProperty(it) })
   }
   return built
 }
@@ -249,6 +236,10 @@ private fun FirDeclarationGenerationExtension.buildBuilderPropertyFunction(
   parameterType: FirTypeRef,
   returnType: ConeKotlinType,
 ): FirSimpleFunction {
+  val parameterName = callableId.callableName.asString().removePrefix("set").let { name ->
+    Name.identifier(name[0].lowercase() + name.substring(1))
+  }
+
   return buildSimpleFunction {
     resolvePhase = FirResolvePhase.BODY_RESOLVE
     moduleData = session.moduleData
@@ -259,8 +250,8 @@ private fun FirDeclarationGenerationExtension.buildBuilderPropertyFunction(
         moduleData = session.moduleData
         origin = Piecemeal.Key.origin
         returnTypeRef = parameterType
-        name = callableId.callableName
-        symbol = FirValueParameterSymbol(callableId.callableName)
+        name = parameterName
+        symbol = FirValueParameterSymbol(parameterName)
         isCrossinline = false
         isNoinline = false
         isVararg = false
@@ -275,6 +266,69 @@ private fun FirDeclarationGenerationExtension.buildBuilderPropertyFunction(
       session.findClassSymbol(it)?.defaultType()
     }
   }
+}
+
+private fun FirDeclarationGenerationExtension.buildBuilderProperty(
+  callableId: CallableId,
+  propertyType: ConeKotlinType,
+): FirProperty {
+  val propertySymbol = FirPropertySymbol(callableId.callableName)
+  val propertyTypeRef = buildResolvedTypeRef {
+    type = propertyType.withNullability(ConeNullability.NULLABLE, session.typeContext)
+  }
+  val dispatchReceiverType = callableId.classId?.let {
+    session.findClassSymbol(it)?.defaultType()
+  }
+
+  val built = buildProperty {
+    moduleData = session.moduleData
+    origin = Piecemeal.Key.origin
+    this.status =
+      FirResolvedDeclarationStatusImpl(Visibilities.Public, Modality.FINAL, EffectiveVisibility.Public)
+    returnTypeRef = propertyTypeRef
+    this.dispatchReceiverType = dispatchReceiverType
+    name = callableId.callableName
+    symbol = propertySymbol
+    isVar = true
+    isLocal = false
+
+    backingField = buildBackingField {
+      moduleData = session.moduleData
+      origin = Piecemeal.Key.origin
+      returnTypeRef = propertyTypeRef
+      this.dispatchReceiverType = dispatchReceiverType
+      this.status =
+        FirResolvedDeclarationStatusImpl(Visibilities.Private, Modality.FINAL, EffectiveVisibility.PrivateInClass)
+      name = StandardNames.BACKING_FIELD
+      symbol = FirBackingFieldSymbol(CallableId(name))
+      this.propertySymbol = propertySymbol
+      this.initializer = buildConstExpression(null, ConstantValueKind.Null, null)
+      this.isVar = true
+      this.isVal = false
+    }
+
+    getter = FirDefaultPropertyGetter(
+      source = null,
+      moduleData = session.moduleData,
+      origin = Piecemeal.Key.origin,
+      propertyTypeRef = propertyTypeRef,
+      visibility = Visibilities.Public,
+      propertySymbol = symbol,
+      effectiveVisibility = EffectiveVisibility.Public,
+    )
+
+    // TODO JvmSynthetic
+    setter = FirDefaultPropertySetter(
+      source = null,
+      moduleData = session.moduleData,
+      origin = Piecemeal.Key.origin,
+      propertyTypeRef = propertyTypeRef,
+      visibility = Visibilities.Public,
+      propertySymbol = symbol,
+      effectiveVisibility = EffectiveVisibility.Public,
+    )
+  }
+  return built
 }
 
 private fun FirDeclarationGenerationExtension.buildBuilderBuildFunction(
