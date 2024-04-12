@@ -20,22 +20,22 @@ import com.bnorm.piecemeal.plugin.fir.PiecemealFirExtensionRegistrar
 import com.bnorm.piecemeal.plugin.ir.PiecemealIrGenerationExtension
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
-import org.jetbrains.kotlin.com.intellij.mock.MockProject
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
+import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 
-@AutoService(ComponentRegistrar::class)
-class PiecemealComponentRegistrar : ComponentRegistrar {
+@OptIn(ExperimentalCompilerApi::class)
+@AutoService(CompilerPluginRegistrar::class)
+class PiecemealComponentRegistrar : CompilerPluginRegistrar() {
 
   override val supportsK2: Boolean
     get() = true
 
-  override fun registerProjectComponents(
-    project: MockProject,
-    configuration: CompilerConfiguration,
+  override fun ExtensionStorage.registerExtensions(
+    configuration: CompilerConfiguration
   ) {
-    FirExtensionRegistrar.registerExtension(project, PiecemealFirExtensionRegistrar())
-    IrGenerationExtension.registerExtension(project, PiecemealIrGenerationExtension())
+    FirExtensionRegistrarAdapter.registerExtension(PiecemealFirExtensionRegistrar())
+    IrGenerationExtension.registerExtension(PiecemealIrGenerationExtension())
   }
 }

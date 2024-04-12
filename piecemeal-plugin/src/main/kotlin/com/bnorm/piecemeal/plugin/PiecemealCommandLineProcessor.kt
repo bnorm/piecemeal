@@ -20,7 +20,9 @@ import com.bnorm.piecemeal.BuildConfig
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 
+@OptIn(ExperimentalCompilerApi::class)
 @Suppress("unused") // Used via reflection
 @AutoService(CommandLineProcessor::class)
 class PiecemealCommandLineProcessor : CommandLineProcessor {

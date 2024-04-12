@@ -2,6 +2,7 @@ plugins {
   kotlin("jvm")
   kotlin("kapt")
   id("com.github.gmazzo.buildconfig")
+  `maven-publish`
 }
 
 dependencies {
@@ -12,7 +13,7 @@ dependencies {
 
   testImplementation(kotlin("test-junit"))
   testImplementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
-  testImplementation("dev.zacsweers.kctfork:core:0.1.0")
+  testImplementation("dev.zacsweers.kctfork:core:0.5.0-alpha06")
 
   testImplementation(project(":piecemeal"))
 }
@@ -20,4 +21,24 @@ dependencies {
 buildConfig {
   packageName(group.toString())
   buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${rootProject.extra["kotlin_plugin_id"]}\"")
+}
+
+tasks {
+  compileTestKotlin {
+    compilerOptions {
+      freeCompilerArgs.add("-Xskip-prerelease-check")
+    }
+  }
+}
+
+publishing {
+  publications {
+    create<MavenPublication>("default") {
+      from(components["java"])
+    }
+  }
+
+  repositories {
+    mavenLocal()
+  }
 }

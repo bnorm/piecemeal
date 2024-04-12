@@ -18,39 +18,18 @@ package com.bnorm.piecemeal.plugin.fir
 
 import com.bnorm.piecemeal.plugin.Piecemeal
 import com.bnorm.piecemeal.plugin.toJavaSetter
-import org.jetbrains.kotlin.builtins.StandardNames
-import org.jetbrains.kotlin.descriptors.ClassKind
-import org.jetbrains.kotlin.descriptors.EffectiveVisibility
-import org.jetbrains.kotlin.descriptors.Modality
-import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.fir.FirSession
-import org.jetbrains.kotlin.fir.containingClassForStaticMemberAttr
-import org.jetbrains.kotlin.fir.declarations.FirConstructor
-import org.jetbrains.kotlin.fir.declarations.FirProperty
-import org.jetbrains.kotlin.fir.declarations.FirRegularClass
-import org.jetbrains.kotlin.fir.declarations.FirResolvePhase
-import org.jetbrains.kotlin.fir.declarations.FirSimpleFunction
-import org.jetbrains.kotlin.fir.declarations.builder.buildBackingField
-import org.jetbrains.kotlin.fir.declarations.builder.buildPrimaryConstructor
-import org.jetbrains.kotlin.fir.declarations.builder.buildProperty
-import org.jetbrains.kotlin.fir.declarations.builder.buildRegularClass
-import org.jetbrains.kotlin.fir.declarations.builder.buildSimpleFunction
-import org.jetbrains.kotlin.fir.declarations.builder.buildValueParameter
-import org.jetbrains.kotlin.fir.declarations.impl.FirDefaultPropertyGetter
-import org.jetbrains.kotlin.fir.declarations.impl.FirDefaultPropertySetter
-import org.jetbrains.kotlin.fir.declarations.impl.FirResolvedDeclarationStatusImpl
-import org.jetbrains.kotlin.fir.declarations.origin
-import org.jetbrains.kotlin.fir.expressions.builder.buildConstExpression
+import org.jetbrains.kotlin.fir.extensions.ExperimentalTopLevelDeclarationsGenerationApi
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationPredicateRegistrar
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
+import org.jetbrains.kotlin.fir.extensions.NestedClassGenerationContext
 import org.jetbrains.kotlin.fir.extensions.predicateBasedProvider
-import org.jetbrains.kotlin.fir.moduleData
-import org.jetbrains.kotlin.fir.resolve.defaultType
+import org.jetbrains.kotlin.fir.plugin.createConstructor
+import org.jetbrains.kotlin.fir.plugin.createMemberFunction
+import org.jetbrains.kotlin.fir.plugin.createMemberProperty
+import org.jetbrains.kotlin.fir.plugin.createNestedClass
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
-import org.jetbrains.kotlin.fir.scopes.kotlinScopeProvider
-import org.jetbrains.kotlin.fir.symbols.impl.ConeClassLikeLookupTagImpl
-import org.jetbrains.kotlin.fir.symbols.impl.FirBackingFieldSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
@@ -58,19 +37,16 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirValueParameterSymbol
-import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.fir.types.ConeNullability
-import org.jetbrains.kotlin.fir.types.FirTypeRef
-import org.jetbrains.kotlin.fir.types.builder.buildResolvedTypeRef
-import org.jetbrains.kotlin.fir.types.impl.ConeClassLikeTypeImpl
+import org.jetbrains.kotlin.fir.types.constructStarProjectedType
 import org.jetbrains.kotlin.fir.types.typeContext
 import org.jetbrains.kotlin.fir.types.withNullability
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
-import org.jetbrains.kotlin.types.ConstantValueKind
 
+@OptIn(ExperimentalTopLevelDeclarationsGenerationApi::class)
 class PiecemealFirGenerationExtension(
   session: FirSession,
 ) : FirDeclarationGenerationExtension(session) {
@@ -98,23 +74,38 @@ class PiecemealFirGenerationExtension(
     callableId: CallableId,
     context: MemberGenerationContext?,
   ): List<FirNamedFunctionSymbol> {
+    val owner = context?.owner ?: return emptyList()
+
     if (callableId.callableName == NEW_BUILDER_FUN_NAME) {
       val classId = callableId.classId ?: return emptyList()
       val builderClassSymbol = session.findClassSymbol(classId.builder) ?: return emptyList()
-      val function = buildNewBuilderFunction(callableId, builderClassSymbol.defaultType())
+      val function = createMemberFunction(
+        owner,
+        Piecemeal.Key,
+        callableId.callableName,
+        builderClassSymbol.constructStarProjectedType()
+      )
       return listOf(function.symbol)
     } else if (callableId.classId in builderClassIds) {
-      val builderClassSymbol = context?.owner ?: return emptyList()
+      val piecemealClass = owner.outerClass!!
       val function = if (callableId.callableName == BUILD_FUN_NAME) {
-        buildBuilderBuildFunction(callableId, builderClassSymbol.outerClass!!.defaultType())
-      } else {
-        val parameter = getPrimaryConstructorValueParameters(builderClassSymbol.outerClass!!)
-          .singleOrNull { it.name.toJavaSetter() == callableId.callableName } ?: return emptyList()
-        buildBuilderPropertyFunction(
-          callableId,
-          parameter.resolvedReturnTypeRef,
-          builderClassSymbol.defaultType()
+        createMemberFunction(
+          owner,
+          Piecemeal.Key,
+          callableId.callableName,
+          piecemealClass.constructStarProjectedType()
         )
+      } else {
+        val parameter = getPrimaryConstructorValueParameters(piecemealClass)
+          .singleOrNull { it.name.toJavaSetter() == callableId.callableName } ?: return emptyList()
+        createMemberFunction(
+          owner,
+          Piecemeal.Key,
+          callableId.callableName,
+          owner.constructStarProjectedType()
+        ) {
+          valueParameter(callableId.callableName.toParameterName(), parameter.resolvedReturnType)
+        }
       }
       return listOf(function.symbol)
     } else {
@@ -128,7 +119,13 @@ class PiecemealFirGenerationExtension(
 
       val parameter = getPrimaryConstructorValueParameters(builderClassSymbol.outerClass!!)
         .singleOrNull { it.name == callableId.callableName } ?: return emptyList()
-      val property = buildBuilderProperty(callableId, parameter.resolvedReturnType)
+      val property = createMemberProperty(
+        owner = builderClassSymbol,
+        key = Piecemeal.Key,
+        name = callableId.callableName,
+        returnType = parameter.resolvedReturnType.withNullability(ConeNullability.NULLABLE, session.typeContext),
+        isVal = false
+      )
 
       return listOf(property.symbol)
     }
@@ -136,22 +133,22 @@ class PiecemealFirGenerationExtension(
     return emptyList()
   }
 
-  override fun generateClassLikeDeclaration(classId: ClassId): FirClassLikeSymbol<*>? {
-    if (classId.shortClassName != BUILDER_CLASS_NAME) return null
-    val outerClassId = classId.outerClassId ?: return null
-    val outerClass = piecemealClasses.singleOrNull { it.classId == outerClassId } ?: return null
-
-    val parameters = getPrimaryConstructorValueParameters(outerClass)
-    return buildBuilderClass(classId).symbol
+  override fun generateNestedClassLikeDeclaration(
+    owner: FirClassSymbol<*>,
+    name: Name,
+    context: NestedClassGenerationContext
+  ): FirClassLikeSymbol<*>? {
+    if (owner !in piecemealClasses) return null
+    return createNestedClass(owner, name, Piecemeal.Key).symbol
   }
 
   override fun generateConstructors(context: MemberGenerationContext): List<FirConstructorSymbol> {
     val ownerClassId = context.owner.classId
     assert(ownerClassId in builderClassIds)
-    return listOf(buildBuilderConstructor(ownerClassId).symbol)
+    return listOf(createConstructor(context.owner, Piecemeal.Key, isPrimary = true).symbol)
   }
 
-  override fun getCallableNamesForClass(classSymbol: FirClassSymbol<*>): Set<Name> {
+  override fun getCallableNamesForClass(classSymbol: FirClassSymbol<*>, context: MemberGenerationContext): Set<Name> {
     return when {
       classSymbol in piecemealClasses -> setOf(NEW_BUILDER_FUN_NAME)
       classSymbol.classId in builderClassIds -> {
@@ -181,7 +178,10 @@ class PiecemealFirGenerationExtension(
   private val FirClassSymbol<*>.outerClass
     get() = classId.outerClassId?.let { session.findClassSymbol(it) }
 
-  override fun getNestedClassifiersNames(classSymbol: FirClassSymbol<*>): Set<Name> {
+  override fun getNestedClassifiersNames(
+    classSymbol: FirClassSymbol<*>,
+    context: NestedClassGenerationContext,
+  ): Set<Name> {
     return if (classSymbol in piecemealClasses) setOf(BUILDER_CLASS_NAME) else emptySet()
   }
 
@@ -190,179 +190,11 @@ class PiecemealFirGenerationExtension(
   }
 }
 
-private fun FirSession.findClassSymbol(classId: ClassId) =
-  symbolProvider.getClassLikeSymbolByClassId(classId) as? FirClassSymbol
-
-private fun FirDeclarationGenerationExtension.buildBuilderClass(
-  classId: ClassId,
-): FirRegularClass {
-  val built = buildRegularClass {
-    resolvePhase = FirResolvePhase.BODY_RESOLVE
-    moduleData = session.moduleData
-    origin = Piecemeal.Key.origin
-    classKind = ClassKind.CLASS
-    scopeProvider = session.kotlinScopeProvider
-    status = FirResolvedDeclarationStatusImpl(Visibilities.Public, Modality.FINAL, EffectiveVisibility.Public)
-    name = classId.shortClassName
-    symbol = FirRegularClassSymbol(classId)
-    superTypeRefs += session.builtinTypes.anyType
-//    declarations.addAll(properties.map { buildProperty(it) })
-  }
-  return built
-}
-
-private fun FirDeclarationGenerationExtension.buildNewBuilderFunction(
-  callableId: CallableId,
-  returnType: ConeKotlinType,
-): FirSimpleFunction {
-  return buildSimpleFunction {
-    resolvePhase = FirResolvePhase.BODY_RESOLVE
-    moduleData = session.moduleData
-    origin = Piecemeal.Key.origin
-    status = FirResolvedDeclarationStatusImpl(Visibilities.Public, Modality.FINAL, EffectiveVisibility.Public)
-    returnTypeRef = buildResolvedTypeRef {
-      type = returnType
-    }
-    name = callableId.callableName
-    symbol = FirNamedFunctionSymbol(callableId)
-    dispatchReceiverType = callableId.classId?.let {
-      session.findClassSymbol(it)?.defaultType()
-    }
-  }
-}
-
-private fun FirDeclarationGenerationExtension.buildBuilderPropertyFunction(
-  callableId: CallableId,
-  parameterType: FirTypeRef,
-  returnType: ConeKotlinType,
-): FirSimpleFunction {
-  val parameterName = callableId.callableName.asString().removePrefix("set").let { name ->
+fun Name.toParameterName(): Name {
+  return asString().removePrefix("set").let { name ->
     Name.identifier(name[0].lowercase() + name.substring(1))
   }
-
-  return buildSimpleFunction {
-    resolvePhase = FirResolvePhase.BODY_RESOLVE
-    moduleData = session.moduleData
-    origin = Piecemeal.Key.origin
-    status = FirResolvedDeclarationStatusImpl(Visibilities.Public, Modality.FINAL, EffectiveVisibility.Public)
-    valueParameters.add(
-      buildValueParameter {
-        moduleData = session.moduleData
-        origin = Piecemeal.Key.origin
-        returnTypeRef = parameterType
-        name = parameterName
-        symbol = FirValueParameterSymbol(parameterName)
-        isCrossinline = false
-        isNoinline = false
-        isVararg = false
-      }
-    )
-    returnTypeRef = buildResolvedTypeRef {
-      type = returnType
-    }
-    name = callableId.callableName
-    symbol = FirNamedFunctionSymbol(callableId)
-    dispatchReceiverType = callableId.classId?.let {
-      session.findClassSymbol(it)?.defaultType()
-    }
-  }
 }
 
-private fun FirDeclarationGenerationExtension.buildBuilderProperty(
-  callableId: CallableId,
-  propertyType: ConeKotlinType,
-): FirProperty {
-  val propertySymbol = FirPropertySymbol(callableId.callableName)
-  val propertyTypeRef = buildResolvedTypeRef {
-    type = propertyType.withNullability(ConeNullability.NULLABLE, session.typeContext)
-  }
-  val dispatchReceiverType = callableId.classId?.let {
-    session.findClassSymbol(it)?.defaultType()
-  }
-
-  val built = buildProperty {
-    moduleData = session.moduleData
-    origin = Piecemeal.Key.origin
-    this.status =
-      FirResolvedDeclarationStatusImpl(Visibilities.Public, Modality.FINAL, EffectiveVisibility.Public)
-    returnTypeRef = propertyTypeRef
-    this.dispatchReceiverType = dispatchReceiverType
-    name = callableId.callableName
-    symbol = propertySymbol
-    isVar = true
-    isLocal = false
-
-    backingField = buildBackingField {
-      moduleData = session.moduleData
-      origin = Piecemeal.Key.origin
-      returnTypeRef = propertyTypeRef
-      this.dispatchReceiverType = dispatchReceiverType
-      this.status =
-        FirResolvedDeclarationStatusImpl(Visibilities.Private, Modality.FINAL, EffectiveVisibility.PrivateInClass)
-      name = StandardNames.BACKING_FIELD
-      symbol = FirBackingFieldSymbol(CallableId(name))
-      this.propertySymbol = propertySymbol
-      this.initializer = buildConstExpression(null, ConstantValueKind.Null, null)
-      this.isVar = true
-      this.isVal = false
-    }
-
-    getter = FirDefaultPropertyGetter(
-      source = null,
-      moduleData = session.moduleData,
-      origin = Piecemeal.Key.origin,
-      propertyTypeRef = propertyTypeRef,
-      visibility = Visibilities.Public,
-      propertySymbol = symbol,
-      effectiveVisibility = EffectiveVisibility.Public,
-    )
-
-    // TODO JvmSynthetic
-    setter = FirDefaultPropertySetter(
-      source = null,
-      moduleData = session.moduleData,
-      origin = Piecemeal.Key.origin,
-      propertyTypeRef = propertyTypeRef,
-      visibility = Visibilities.Public,
-      propertySymbol = symbol,
-      effectiveVisibility = EffectiveVisibility.Public,
-    )
-  }
-  return built
-}
-
-private fun FirDeclarationGenerationExtension.buildBuilderBuildFunction(
-  callableId: CallableId,
-  returnType: ConeKotlinType,
-): FirSimpleFunction {
-  return buildSimpleFunction {
-    resolvePhase = FirResolvePhase.BODY_RESOLVE
-    moduleData = session.moduleData
-    origin = Piecemeal.Key.origin
-    status = FirResolvedDeclarationStatusImpl(Visibilities.Public, Modality.FINAL, EffectiveVisibility.Public)
-    returnTypeRef = buildResolvedTypeRef {
-      type = returnType
-    }
-    name = callableId.callableName
-    symbol = FirNamedFunctionSymbol(callableId)
-    dispatchReceiverType = callableId.classId?.let {
-      session.findClassSymbol(it)?.defaultType()
-    }
-  }
-}
-
-private fun FirDeclarationGenerationExtension.buildBuilderConstructor(classId: ClassId): FirConstructor {
-  val lookupTag = ConeClassLikeLookupTagImpl(classId)
-  return buildPrimaryConstructor {
-    resolvePhase = FirResolvePhase.BODY_RESOLVE
-    moduleData = session.moduleData
-    origin = Piecemeal.Key.origin
-    returnTypeRef = buildResolvedTypeRef {
-      type = ConeClassLikeTypeImpl(lookupTag, emptyArray(), isNullable = false)
-    }
-    status = FirResolvedDeclarationStatusImpl(Visibilities.Public, Modality.FINAL, EffectiveVisibility.Public)
-    symbol = FirConstructorSymbol(classId)
-  }.also {
-    it.containingClassForStaticMemberAttr = lookupTag
-  }
-}
+private fun FirSession.findClassSymbol(classId: ClassId) =
+  symbolProvider.getClassLikeSymbolByClassId(classId) as? FirClassSymbol

@@ -18,9 +18,11 @@ package com.bnorm.piecemeal
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
 import kotlin.test.assertEquals
 
+@OptIn(ExperimentalCompilerApi::class)
 class IrPluginTest {
 
   @Test

@@ -1,3 +1,9 @@
+dependencyResolutionManagement {
+  repositories {
+    mavenCentral()
+  }
+}
+
 rootProject.name = "piecemeal-root"
 
 include(":piecemeal")

@@ -2,6 +2,7 @@ plugins {
   id("java-gradle-plugin")
   kotlin("jvm")
   id("com.github.gmazzo.buildconfig")
+  `maven-publish`
 }
 
 dependencies {
@@ -30,5 +31,11 @@ gradlePlugin {
       description = "Piecemeal"
       implementationClass = "com.bnorm.piecemeal.PiecemealGradlePlugin"
     }
+  }
+}
+
+publishing {
+  repositories {
+    mavenLocal()
   }
 }

@@ -1,5 +1,6 @@
 plugins {
   kotlin("multiplatform")
+  `maven-publish`
 }
 
 kotlin {
@@ -23,5 +24,11 @@ kotlin {
   sourceSets {
     val commonMain by getting {
     }
+  }
+}
+
+publishing {
+  repositories {
+    mavenLocal()
   }
 }

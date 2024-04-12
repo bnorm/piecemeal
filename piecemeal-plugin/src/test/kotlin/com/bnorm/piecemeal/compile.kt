@@ -17,19 +17,22 @@
 package com.bnorm.piecemeal
 
 import com.bnorm.piecemeal.plugin.PiecemealComponentRegistrar
+import com.tschuchort.compiletesting.JvmCompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 
+@ExperimentalCompilerApi
 fun compile(vararg sourceFiles: SourceFile) = compile(sourceFiles.toList())
 
+@ExperimentalCompilerApi
 fun compile(
   sourceFiles: List<SourceFile>,
-): KotlinCompilation.Result {
+): JvmCompilationResult {
   return KotlinCompilation().apply {
     sources = sourceFiles
-    useK2 = true
     supportsK2 = true
-    compilerPlugins = listOf(PiecemealComponentRegistrar())
+    compilerPluginRegistrars = listOf(PiecemealComponentRegistrar())
     inheritClassPath = true
   }.compile()
 }

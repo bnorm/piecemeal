@@ -19,47 +19,34 @@ package com.bnorm.piecemeal.plugin.ir
 import com.bnorm.piecemeal.plugin.Piecemeal
 import com.bnorm.piecemeal.plugin.toJavaSetter
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
+import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.backend.common.lower.irThrow
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
-import org.jetbrains.kotlin.ir.declarations.IrClass
-import org.jetbrains.kotlin.ir.declarations.IrConstructor
-import org.jetbrains.kotlin.ir.declarations.IrDeclaration
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
-import org.jetbrains.kotlin.ir.declarations.IrField
-import org.jetbrains.kotlin.ir.declarations.IrFile
-import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
-import org.jetbrains.kotlin.ir.declarations.IrProperty
-import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
-import org.jetbrains.kotlin.ir.declarations.IrValueDeclaration
-import org.jetbrains.kotlin.ir.declarations.isPropertyAccessor
+import org.jetbrains.kotlin.ir.builders.*
+import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrBody
-import org.jetbrains.kotlin.ir.expressions.IrCall
-import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrGetField
 import org.jetbrains.kotlin.ir.expressions.IrGetValue
-import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrConstructorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrGetFieldImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrReturnImpl
-import org.jetbrains.kotlin.ir.expressions.impl.IrSetFieldImpl
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrSimpleType
-import org.jetbrains.kotlin.ir.util.isGetter
-import org.jetbrains.kotlin.ir.util.isSetter
-import org.jetbrains.kotlin.ir.util.parentAsClass
+import org.jetbrains.kotlin.ir.types.classifierOrNull
+import org.jetbrains.kotlin.ir.util.deepCopyWithoutPatchingParents
 import org.jetbrains.kotlin.ir.util.primaryConstructor
+import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.name.Name
 
+@OptIn(UnsafeDuringIrConstructionAPI::class)
 class PiecemealBuilderGenerator(
-  context: IrPluginContext,
+  private val context: IrPluginContext,
 ) : IrElementVisitorVoid {
-  private val irFactory = context.irFactory
-  private val irBuiltIns = context.irBuiltIns
+
+  // TODO support class type parameters
+  // TODO remove defaults from primary constructor?
 
   override fun visitElement(element: IrElement) {
     when (element) {
@@ -103,20 +90,30 @@ class PiecemealBuilderGenerator(
    * ```
    */
   private fun generateNewBuilderFunction(function: IrSimpleFunction): IrBody? {
-    val constructedType = function.returnType as? IrSimpleType ?: return null
-    val constructedClass = constructedType.classifier.owner as? IrClass ?: return null
-    val constructor = constructedClass.primaryConstructor ?: return null
+    val receiver = function.dispatchReceiverParameter ?: return null
+    val piecemealClass = function.parent as? IrClass ?: return null
+    val builderClass = function.returnType.classifierOrNull?.owner as? IrClass ?: return null
+    val builderConstructor = builderClass.primaryConstructor ?: return null
 
-    // TODO load values from current instance properties
+    val properties = piecemealClass.declarations.filterIsInstance<IrProperty>()
+      .associateBy { it.name }
 
-    val constructorCall = constructor.irConstructorCall()
-    val returnStatement = IrReturnImpl(
-      UNDEFINED_OFFSET, UNDEFINED_OFFSET,
-      irBuiltIns.nothingType,
-      function.symbol,
-      constructorCall,
-    )
-    return irFactory.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET, listOf(returnStatement))
+    val irBuilder = DeclarationIrBuilder(context, function.symbol)
+    return irBuilder.irBlockBody {
+      val tmp = irTemporary(nameHint = "builder", value = irCall(builderConstructor))
+
+      for (builderProperty in builderClass.declarations.filterIsInstance<IrProperty>()) {
+        val piecemealProperty = properties[builderProperty.name] ?: continue
+        +irCall(builderProperty.setter!!).apply {
+          dispatchReceiver = irGet(tmp)
+          putValueArgument(0, irCall(piecemealProperty.getter!!).apply {
+            dispatchReceiver = irGet(receiver)
+          })
+        }
+      }
+
+      +irReturn(irGet(tmp))
+    }
   }
 
   /**
@@ -128,23 +125,21 @@ class PiecemealBuilderGenerator(
    * ```
    */
   private fun generateBuilderSetter(function: IrSimpleFunction): IrBody? {
-    val receiver = function.dispatchReceiverParameter?.irGetValue() ?: return null
+    val receiver = function.dispatchReceiverParameter ?: return null
+    val builderClass = function.parent as? IrClass ?: return null
+    val property = builderClass.declarations.filterIsInstance<IrProperty>()
+      .single { it.name.toJavaSetter() == function.name }
 
-    val builderType = function.parent as? IrClass ?: return null
-    val builderProperties = builderType.declarations.filterIsInstance<IrProperty>()
-    val setter = builderProperties.single { it.name.toJavaSetter() == function.name }.setter!!
+    val irBuilder = DeclarationIrBuilder(context, function.symbol)
+    return irBuilder.irBlockBody {
+      val propertySet = irCall(property.setter!!).apply {
+        dispatchReceiver = irGet(receiver)
+        putValueArgument(0, irGet(function.valueParameters[0]))
+      }
 
-    val propertySet = setter.irCall().apply {
-      dispatchReceiver = receiver
-      putValueArgument(0, function.valueParameters[0].irGetValue())
+      +propertySet
+      +irReturn(irGet(receiver))
     }
-    val returnStatement = IrReturnImpl(
-      UNDEFINED_OFFSET, UNDEFINED_OFFSET,
-      irBuiltIns.nothingType,
-      function.symbol,
-      receiver,
-    )
-    return irFactory.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET, listOf(propertySet, returnStatement))
   }
 
   /**
@@ -156,96 +151,93 @@ class PiecemealBuilderGenerator(
    *
    *     return Person(
    *         name = name,
-   *         nickname = nickname ?: name,
+   *         nickname = nickname,
    *         age = age,
    *     )
    * }
    * ```
    */
   private fun generateBuildFunction(function: IrSimpleFunction): IrBody? {
-    val builderType = function.parent as? IrClass ?: return null
-    val constructedType = function.returnType as? IrSimpleType ?: return null
-    val constructedClass = constructedType.classifier.owner as? IrClass ?: return null
-    val constructor = constructedClass.primaryConstructor ?: return null
+    val builderClass = function.parent as? IrClass ?: return null
+    val piecemealClass = function.returnType.classifierOrNull?.owner as? IrClass ?: return null
+    val piecemealConstructor = piecemealClass.primaryConstructor ?: return null
 
-    // TODO check and non-null and add constructor defaults
-    // TODO remove defaults from primary constructor?
+    val irBuilder = DeclarationIrBuilder(context, function.symbol)
+    return irBuilder.irBlockBody {
+      val variables = irBuilderParameters(
+        builderProperties = builderClass.declarations.filterIsInstance<IrProperty>(),
+        builderParameter = function.dispatchReceiverParameter!!,
+        constructorParameters = piecemealConstructor.valueParameters
+      )
 
-    val builderProperties = builderType.declarations.filterIsInstance<IrProperty>()
-    val constructorCall = constructor.irConstructorCall().apply {
-      for ((index, valueParameter) in constructor.valueParameters.withIndex()) {
-        // TODO CHECK_NOT_NULL or other uninitialized error
-        val getter = builderProperties.single { it.name == valueParameter.name }.getter!!
-        putValueArgument(index, getter.irCall().apply {
-          dispatchReceiver = function.dispatchReceiverParameter!!.irGetValue()
-        })
+      val constructorCall = irCall(piecemealConstructor).apply {
+        variables.forEachIndexed { index, variable ->
+          putValueArgument(index, irGet(variable))
+        }
       }
+
+      +irReturn(constructorCall)
     }
-    val returnStatement = IrReturnImpl(
-      UNDEFINED_OFFSET, UNDEFINED_OFFSET,
-      irBuiltIns.nothingType,
-      function.symbol,
-      constructorCall,
-    )
-    return irFactory.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET, listOf(returnStatement))
   }
 
   private fun generateBuilderConstructor(declaration: IrConstructor): IrBody? {
-    val type = declaration.returnType as? IrSimpleType ?: return null
-    val anySymbol = irBuiltIns.anyClass.owner.primaryConstructor?.symbol ?: return null
-    val classSymbol = (declaration.parent as? IrClass)?.symbol ?: return null
+    val builderType = declaration.returnType as? IrSimpleType ?: return null
+    val builderClass = declaration.parent as? IrClass ?: return null
+    val anySymbol = context.irBuiltIns.anyClass.owner.primaryConstructor?.symbol ?: return null
 
-    val delegatingAnyCall = IrDelegatingConstructorCallImpl(
-      UNDEFINED_OFFSET, UNDEFINED_OFFSET,
-      irBuiltIns.anyType,
-      anySymbol,
-      typeArgumentsCount = 0,
-      valueArgumentsCount = 0
-    )
-    val initializerCall = IrInstanceInitializerCallImpl(
-      UNDEFINED_OFFSET, UNDEFINED_OFFSET,
-      classSymbol,
-      type,
-    )
-    return irFactory.createBlockBody(UNDEFINED_OFFSET, UNDEFINED_OFFSET, listOf(delegatingAnyCall, initializerCall))
+    val irBuilder = DeclarationIrBuilder(context, declaration.symbol)
+    return irBuilder.irBlockBody {
+      +IrDelegatingConstructorCallImpl(
+        UNDEFINED_OFFSET, UNDEFINED_OFFSET,
+        context.irBuiltIns.anyType,
+        anySymbol,
+        typeArgumentsCount = 0,
+        valueArgumentsCount = 0
+      )
+      +IrInstanceInitializerCallImpl(
+        UNDEFINED_OFFSET, UNDEFINED_OFFSET,
+        builderClass.symbol,
+        builderType,
+      )
+    }
   }
-}
 
-private fun IrValueDeclaration.irGetValue(
-  startOffset: Int = UNDEFINED_OFFSET,
-  endOffset: Int = UNDEFINED_OFFSET,
-): IrGetValue = IrGetValueImpl(
-  startOffset = startOffset,
-  endOffset = endOffset,
-  type = type,
-  symbol = symbol,
-)
+  private fun IrBlockBodyBuilder.irBuilderParameters(
+    builderProperties: List<IrProperty>,
+    builderParameter: IrValueParameter,
+    constructorParameters: List<IrValueParameter>
+  ): MutableList<IrVariable> {
+    val variables = mutableListOf<IrVariable>()
+    val transformer = object : IrElementTransformerVoid() {
+      override fun visitGetValue(expression: IrGetValue): IrExpression {
+        val index = constructorParameters.indexOfFirst { it.symbol == expression.symbol }
+        if (index != -1) {
+          return irGet(variables[index])
+        }
+        return super.visitGetValue(expression)
+      }
+    }
 
-private fun IrSimpleFunction.irCall(
-  startOffset: Int = UNDEFINED_OFFSET,
-  endOffset: Int = UNDEFINED_OFFSET,
-): IrCall = IrCallImpl(
-  startOffset = startOffset,
-  endOffset = endOffset,
-  type = returnType,
-  symbol = symbol,
-  typeArgumentsCount = typeParameters.size,
-  valueArgumentsCount = valueParameters.size,
-)
+    for (valueParameter in constructorParameters) {
+      val getter = builderProperties.single { it.name == valueParameter.name }.getter!!
+      variables += irTemporary(nameHint = valueParameter.name.asString(), value = irBlock {
+        val value = irTemporary(irCall(getter).apply {
+          dispatchReceiver = irGet(builderParameter)
+        })
 
-private fun IrConstructor.irConstructorCall(
-  startOffset: Int = UNDEFINED_OFFSET,
-  endOffset: Int = UNDEFINED_OFFSET,
-): IrConstructorCall {
-  val classTypeParametersCount = parentAsClass.typeParameters.size
-  val constructorTypeParametersCount = typeParameters.size
-  return IrConstructorCallImpl(
-    startOffset = startOffset,
-    endOffset = endOffset,
-    type = returnType,
-    symbol = symbol,
-    typeArgumentsCount = classTypeParametersCount + constructorTypeParametersCount,
-    constructorTypeArgumentsCount = constructorTypeParametersCount,
-    valueArgumentsCount = valueParameters.size
-  )
+        val defaultValue = valueParameter.defaultValue
+        val whenNullValue = if (defaultValue != null) {
+          defaultValue.expression.deepCopyWithoutPatchingParents().transform(transformer, null)
+        } else {
+          // TODO IllegalStateException
+          irThrow(irCall(context.irBuiltIns.illegalArgumentExceptionSymbol).apply {
+            putValueArgument(0, irString("Missing required parameter '${valueParameter.name}'."))
+          })
+        }
+
+        +irIfNull(getter.returnType, irGet(value), whenNullValue, irGet(value))
+      })
+    }
+    return variables
+  }
 }
