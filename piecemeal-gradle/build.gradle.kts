@@ -15,6 +15,11 @@ buildConfig {
   buildConfigField("String", "KOTLIN_PLUGIN_GROUP", "\"${project.group}\"")
   buildConfigField("String", "KOTLIN_PLUGIN_NAME", "\"${project.name}\"")
   buildConfigField("String", "KOTLIN_PLUGIN_VERSION", "\"${project.version}\"")
+
+  val supportProject = project(":piecemeal")
+  buildConfigField("String", "SUPPORT_LIBRARY_GROUP", "\"${supportProject.group}\"")
+  buildConfigField("String", "SUPPORT_LIBRARY_NAME", "\"${supportProject.name}\"")
+  buildConfigField("String", "SUPPORT_LIBRARY_VERSION", "\"${supportProject.version}\"")
 }
 
 gradlePlugin {

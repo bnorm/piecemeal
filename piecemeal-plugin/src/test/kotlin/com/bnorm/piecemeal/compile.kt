@@ -16,13 +16,18 @@
 
 package com.bnorm.piecemeal
 
-import com.google.auto.service.AutoService
-import org.jetbrains.kotlin.compiler.plugin.CliOption
-import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
+import com.tschuchort.compiletesting.KotlinCompilation
+import com.tschuchort.compiletesting.SourceFile
 
-@Suppress("unused") // Used via reflection
-@AutoService(CommandLineProcessor::class)
-class PiecemealCommandLineProcessor : CommandLineProcessor {
-  override val pluginId: String = BuildConfig.KOTLIN_PLUGIN_ID
-  override val pluginOptions: Collection<CliOption> = emptyList()
+fun compile(vararg sourceFiles: SourceFile) = compile(sourceFiles.toList())
+
+fun compile(
+  sourceFiles: List<SourceFile>,
+): KotlinCompilation.Result {
+  return KotlinCompilation().apply {
+    sources = sourceFiles
+    useK2 = true
+    compilerPlugins = listOf(PiecemealComponentRegistrar())
+    inheritClassPath = true
+  }.compile()
 }

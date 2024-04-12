@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.bnorm.piecemeal
+package com.bnorm.piecemeal.fir
 
-import com.google.auto.service.AutoService
-import org.jetbrains.kotlin.compiler.plugin.CliOption
-import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
+import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 
-@Suppress("unused") // Used via reflection
-@AutoService(CommandLineProcessor::class)
-class PiecemealCommandLineProcessor : CommandLineProcessor {
-  override val pluginId: String = BuildConfig.KOTLIN_PLUGIN_ID
-  override val pluginOptions: Collection<CliOption> = emptyList()
+class PiecemealFirExtensionRegistrar : FirExtensionRegistrar() {
+  override fun ExtensionRegistrarContext.configurePlugin() {
+    +::PiecemealFirGenerationExtension
+  }
 }
