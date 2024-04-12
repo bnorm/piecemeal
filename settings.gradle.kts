@@ -1,4 +1,4 @@
-rootProject.name = "kotlin-ir-plugin-template"
+rootProject.name = "piecemeal-root"
 
-include(":kotlin-ir-plugin-gradle")
-include(":kotlin-ir-plugin")
+include(":piecemeal-gradle")
+include(":piecemeal-plugin")

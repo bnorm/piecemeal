@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Brian Norman
+ * Copyright (C) 2022 Brian Norman
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bnorm.template
+package com.bnorm.piecemeal
 
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
@@ -23,9 +23,9 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
-class TemplateGradlePlugin : KotlinCompilerPluginSupportPlugin {
+class PiecemealGradlePlugin : KotlinCompilerPluginSupportPlugin {
   override fun apply(target: Project): Unit = with(target) {
-    extensions.create("template", TemplateGradleExtension::class.java)
+    extensions.create("piecemeal", PiecemealGradleExtension::class.java)
   }
 
   override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
@@ -42,7 +42,7 @@ class TemplateGradlePlugin : KotlinCompilerPluginSupportPlugin {
     kotlinCompilation: KotlinCompilation<*>
   ): Provider<List<SubpluginOption>> {
     val project = kotlinCompilation.target.project
-    val extension = project.extensions.getByType(TemplateGradleExtension::class.java)
+    val extension = project.extensions.getByType(PiecemealGradleExtension::class.java)
     return project.provider {
       listOf(
         SubpluginOption(key = "string", value = extension.stringProperty.get()),
