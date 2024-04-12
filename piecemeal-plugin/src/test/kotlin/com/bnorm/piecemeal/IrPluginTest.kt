@@ -29,19 +29,12 @@ class IrPluginTest {
         "main.kt", """import com.bnorm.piecemeal.Piecemeal
 
 @Piecemeal
-class First
+class Person(
+    val name: String,
+)
 
-@Piecemeal
-class Second
-
-fun box(): String {
-    val result1 = First.Builder()
-    if (result1 is First.Builder) return "Error: ${'$'}result1"
-
-    val result2 = Second().newBuilder()
-    if (result2 is Second.Builder) return "Error: ${'$'}result2"
-
-    return "OK"
+fun person(): Person {
+    return Person.Builder().name("John").build()
 }
 """
       )

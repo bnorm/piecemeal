@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.bnorm.piecemeal
+package com.bnorm.piecemeal.plugin
 
-import com.bnorm.piecemeal.fir.PiecemealFirExtensionRegistrar
-import com.bnorm.piecemeal.ir.PiecemealIrGenerationExtension
+import com.bnorm.piecemeal.plugin.fir.PiecemealFirExtensionRegistrar
+import com.bnorm.piecemeal.plugin.ir.PiecemealIrGenerationExtension
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.com.intellij.mock.MockProject

@@ -16,6 +16,7 @@
 
 package com.bnorm.piecemeal
 
+import com.bnorm.piecemeal.plugin.PiecemealComponentRegistrar
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 
