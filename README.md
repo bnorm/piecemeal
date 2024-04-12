@@ -17,3 +17,7 @@ fun person(): Person {
     return Person.Builder().name("John").build()
 }
 ```
+
+## Inspiration
+
+- https://github.com/ZacSweers/redacted-compiler-plugin/pull/86

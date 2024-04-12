@@ -208,7 +208,7 @@ class PiecemealBodyGenerator(
         // TODO CHECK_NOT_NULL or other uninitialized error
         val getter = builderProperties.single { it.name == valueParameter.name }.getter!!
         putValueArgument(index, getter.irCall().apply {
-          dispatchReceiver = getter.dispatchReceiverParameter!!.irGetValue()
+          dispatchReceiver = function.dispatchReceiverParameter!!.irGetValue()
         })
       }
     }
