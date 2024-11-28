@@ -4,8 +4,10 @@ plugins {
 }
 
 kotlin {
+  explicitApi()
+
   jvm()
-  js(IR) {
+  js {
     browser()
     nodejs()
   }

@@ -3,7 +3,7 @@ import com.bnorm.piecemeal.Piecemeal
 @Piecemeal
 class Person(
   val name: String,
-  val nickname: String? = name,
+  val nickname: String? = null,
   val age: Int = 0,
 ) {
   override fun toString(): String {
@@ -12,18 +12,23 @@ class Person(
 }
 
 fun main() {
-  var me = Person.Builder()
+  var brian = Person.Builder()
     .setName("Brian")
     .build()
-  println(me)
+  println(brian)
 
-  me = me.newBuilder()
+  brian = brian.newBuilder()
     .setAge(35)
     .build()
-  println(me)
+  println(brian)
 
-  val jane = Person {
-    name = "Jane"
+  var melinda = Person {
+    name = "Melinda"
   }
-  println(jane)
+  println(melinda)
+
+  melinda = melinda.newBuilder().apply {
+    age = 34
+  }.build()
+  println(melinda)
 }

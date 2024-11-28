@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 
 @OptIn(ExperimentalCompilerApi::class)
+@Suppress("unused") // Used via reflection
 @AutoService(CompilerPluginRegistrar::class)
 class PiecemealComponentRegistrar : CompilerPluginRegistrar() {
 

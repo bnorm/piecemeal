@@ -1,0 +1,238 @@
+FILE fqName:<root> fileName:/IrDumpActual.kt
+  CLASS CLASS name:Person modality:FINAL visibility:public superTypes:[kotlin.Any]
+    annotations:
+      Piecemeal
+    $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:<root>.Person
+    PROPERTY name:name visibility:public modality:FINAL [val]
+      FIELD PROPERTY_BACKING_FIELD name:name type:kotlin.String visibility:private [final]
+        EXPRESSION_BODY
+          GET_VAR 'name: kotlin.String declared in <root>.Person.<init>' type=kotlin.String origin=INITIALIZE_PROPERTY_FROM_PARAMETER
+      FUN DEFAULT_PROPERTY_ACCESSOR name:<get-name> visibility:public modality:FINAL <> ($this:<root>.Person) returnType:kotlin.String
+        correspondingProperty: PROPERTY name:name visibility:public modality:FINAL [val]
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person
+        BLOCK_BODY
+          RETURN type=kotlin.Nothing from='public final fun <get-name> (): kotlin.String declared in <root>.Person'
+            GET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:name type:kotlin.String visibility:private [final]' type=kotlin.String origin=null
+              receiver: GET_VAR '<this>: <root>.Person declared in <root>.Person.<get-name>' type=<root>.Person origin=null
+    PROPERTY name:nickname visibility:public modality:FINAL [val]
+      FIELD PROPERTY_BACKING_FIELD name:nickname type:kotlin.String? visibility:private [final]
+        EXPRESSION_BODY
+          GET_VAR 'nickname: kotlin.String? declared in <root>.Person.<init>' type=kotlin.String? origin=INITIALIZE_PROPERTY_FROM_PARAMETER
+      FUN DEFAULT_PROPERTY_ACCESSOR name:<get-nickname> visibility:public modality:FINAL <> ($this:<root>.Person) returnType:kotlin.String?
+        correspondingProperty: PROPERTY name:nickname visibility:public modality:FINAL [val]
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person
+        BLOCK_BODY
+          RETURN type=kotlin.Nothing from='public final fun <get-nickname> (): kotlin.String? declared in <root>.Person'
+            GET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:nickname type:kotlin.String? visibility:private [final]' type=kotlin.String? origin=null
+              receiver: GET_VAR '<this>: <root>.Person declared in <root>.Person.<get-nickname>' type=<root>.Person origin=null
+    PROPERTY name:age visibility:public modality:FINAL [val]
+      FIELD PROPERTY_BACKING_FIELD name:age type:kotlin.Int visibility:private [final]
+        EXPRESSION_BODY
+          GET_VAR 'age: kotlin.Int declared in <root>.Person.<init>' type=kotlin.Int origin=INITIALIZE_PROPERTY_FROM_PARAMETER
+      FUN DEFAULT_PROPERTY_ACCESSOR name:<get-age> visibility:public modality:FINAL <> ($this:<root>.Person) returnType:kotlin.Int
+        correspondingProperty: PROPERTY name:age visibility:public modality:FINAL [val]
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person
+        BLOCK_BODY
+          RETURN type=kotlin.Nothing from='public final fun <get-age> (): kotlin.Int declared in <root>.Person'
+            GET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:age type:kotlin.Int visibility:private [final]' type=kotlin.Int origin=null
+              receiver: GET_VAR '<this>: <root>.Person declared in <root>.Person.<get-age>' type=<root>.Person origin=null
+    CLASS GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] CLASS name:Builder modality:FINAL visibility:public superTypes:[kotlin.Any]
+      $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:<root>.Person.Builder
+      PROPERTY GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:name visibility:public modality:FINAL [var]
+        FIELD PROPERTY_BACKING_FIELD name:name type:kotlin.String? visibility:private
+        FUN DEFAULT_PROPERTY_ACCESSOR name:<get-name> visibility:public modality:FINAL <> ($this:<root>.Person.Builder) returnType:kotlin.String?
+          correspondingProperty: PROPERTY GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:name visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
+          BLOCK_BODY
+            RETURN type=kotlin.Nothing from='public final fun <get-name> (): kotlin.String? declared in <root>.Person.Builder'
+              GET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:name type:kotlin.String? visibility:private' type=kotlin.String? origin=null
+                receiver: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.<get-name>' type=<root>.Person.Builder origin=null
+        FUN DEFAULT_PROPERTY_ACCESSOR name:<set-name> visibility:public modality:FINAL <> ($this:<root>.Person.Builder, <set-?>:kotlin.String?) returnType:kotlin.Unit
+          correspondingProperty: PROPERTY GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:name visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
+          VALUE_PARAMETER name:<set-?> index:0 type:kotlin.String?
+          BLOCK_BODY
+            SET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:name type:kotlin.String? visibility:private' type=kotlin.Unit origin=null
+              receiver: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.<set-name>' type=<root>.Person.Builder origin=null
+              value: GET_VAR '<set-?>: kotlin.String? declared in <root>.Person.Builder.<set-name>' type=kotlin.String? origin=null
+      PROPERTY GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname visibility:public modality:FINAL [var]
+        FIELD PROPERTY_BACKING_FIELD name:nickname type:kotlin.String? visibility:private
+        FUN DEFAULT_PROPERTY_ACCESSOR name:<get-nickname> visibility:public modality:FINAL <> ($this:<root>.Person.Builder) returnType:kotlin.String?
+          correspondingProperty: PROPERTY GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
+          BLOCK_BODY
+            RETURN type=kotlin.Nothing from='public final fun <get-nickname> (): kotlin.String? declared in <root>.Person.Builder'
+              GET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:nickname type:kotlin.String? visibility:private' type=kotlin.String? origin=null
+                receiver: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.<get-nickname>' type=<root>.Person.Builder origin=null
+        FUN DEFAULT_PROPERTY_ACCESSOR name:<set-nickname> visibility:public modality:FINAL <> ($this:<root>.Person.Builder, <set-?>:kotlin.String?) returnType:kotlin.Unit
+          correspondingProperty: PROPERTY GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
+          VALUE_PARAMETER name:<set-?> index:0 type:kotlin.String?
+          BLOCK_BODY
+            SET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:nickname type:kotlin.String? visibility:private' type=kotlin.Unit origin=null
+              receiver: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.<set-nickname>' type=<root>.Person.Builder origin=null
+              value: GET_VAR '<set-?>: kotlin.String? declared in <root>.Person.Builder.<set-nickname>' type=kotlin.String? origin=null
+      PROPERTY GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:age visibility:public modality:FINAL [var]
+        FIELD PROPERTY_BACKING_FIELD name:age type:kotlin.Int? visibility:private
+        FUN DEFAULT_PROPERTY_ACCESSOR name:<get-age> visibility:public modality:FINAL <> ($this:<root>.Person.Builder) returnType:kotlin.Int?
+          correspondingProperty: PROPERTY GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:age visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
+          BLOCK_BODY
+            RETURN type=kotlin.Nothing from='public final fun <get-age> (): kotlin.Int? declared in <root>.Person.Builder'
+              GET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:age type:kotlin.Int? visibility:private' type=kotlin.Int? origin=null
+                receiver: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.<get-age>' type=<root>.Person.Builder origin=null
+        FUN DEFAULT_PROPERTY_ACCESSOR name:<set-age> visibility:public modality:FINAL <> ($this:<root>.Person.Builder, <set-?>:kotlin.Int?) returnType:kotlin.Unit
+          correspondingProperty: PROPERTY GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:age visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
+          VALUE_PARAMETER name:<set-?> index:0 type:kotlin.Int?
+          BLOCK_BODY
+            SET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:age type:kotlin.Int? visibility:private' type=kotlin.Unit origin=null
+              receiver: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.<set-age>' type=<root>.Person.Builder origin=null
+              value: GET_VAR '<set-?>: kotlin.Int? declared in <root>.Person.Builder.<set-age>' type=kotlin.Int? origin=null
+      CONSTRUCTOR GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] visibility:public <> () returnType:<root>.Person.Builder [primary]
+        BLOCK_BODY
+          DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> () declared in kotlin.Any'
+          INSTANCE_INITIALIZER_CALL classDescriptor='CLASS GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] CLASS name:Builder modality:FINAL visibility:public superTypes:[kotlin.Any]'
+      FUN FAKE_OVERRIDE name:equals visibility:public modality:OPEN <> ($this:kotlin.Any, other:kotlin.Any?) returnType:kotlin.Boolean [fake_override,operator]
+        overridden:
+          public open fun equals (other: kotlin.Any?): kotlin.Boolean declared in kotlin.Any
+        $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+        VALUE_PARAMETER name:other index:0 type:kotlin.Any?
+      FUN FAKE_OVERRIDE name:hashCode visibility:public modality:OPEN <> ($this:kotlin.Any) returnType:kotlin.Int [fake_override]
+        overridden:
+          public open fun hashCode (): kotlin.Int declared in kotlin.Any
+        $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+      FUN FAKE_OVERRIDE name:toString visibility:public modality:OPEN <> ($this:kotlin.Any) returnType:kotlin.String [fake_override]
+        overridden:
+          public open fun toString (): kotlin.String declared in kotlin.Any
+        $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+      FUN GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:build visibility:public modality:FINAL <> ($this:<root>.Person.Builder) returnType:<root>.Person
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
+        BLOCK_BODY
+          VAR IR_TEMPORARY_VARIABLE name:tmp_0 type:kotlin.String? [val]
+            BLOCK type=kotlin.String? origin=null
+              VAR IR_TEMPORARY_VARIABLE name:tmp_1 type:kotlin.String? [val]
+                CALL 'public final fun <get-name> (): kotlin.String? declared in <root>.Person.Builder' type=kotlin.String? origin=null
+                  $this: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.build' type=<root>.Person.Builder origin=null
+              WHEN type=kotlin.String? origin=null
+                BRANCH
+                  if: CALL 'public final fun EQEQ (arg0: kotlin.Any?, arg1: kotlin.Any?): kotlin.Boolean declared in kotlin.internal.ir' type=kotlin.Boolean origin=EQEQ
+                    arg0: GET_VAR 'val tmp_1: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
+                    arg1: CONST Null type=kotlin.Nothing? value=null
+                  then: THROW type=kotlin.Nothing
+                    CALL 'public final fun illegalArgumentException (arg0: kotlin.String): kotlin.Nothing declared in kotlin.internal.ir' type=kotlin.Nothing origin=null
+                      arg0: CONST String type=kotlin.String value="Missing required parameter 'name'."
+                BRANCH
+                  if: CONST Boolean type=kotlin.Boolean value=true
+                  then: GET_VAR 'val tmp_1: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
+          VAR IR_TEMPORARY_VARIABLE name:tmp_2 type:kotlin.String? [val]
+            BLOCK type=kotlin.String? origin=null
+              VAR IR_TEMPORARY_VARIABLE name:tmp_3 type:kotlin.String? [val]
+                CALL 'public final fun <get-nickname> (): kotlin.String? declared in <root>.Person.Builder' type=kotlin.String? origin=null
+                  $this: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.build' type=<root>.Person.Builder origin=null
+              WHEN type=kotlin.String? origin=null
+                BRANCH
+                  if: CALL 'public final fun EQEQ (arg0: kotlin.Any?, arg1: kotlin.Any?): kotlin.Boolean declared in kotlin.internal.ir' type=kotlin.Boolean origin=EQEQ
+                    arg0: GET_VAR 'val tmp_3: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
+                    arg1: CONST Null type=kotlin.Nothing? value=null
+                  then: GET_VAR 'val tmp_0: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
+                BRANCH
+                  if: CONST Boolean type=kotlin.Boolean value=true
+                  then: GET_VAR 'val tmp_3: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
+          VAR IR_TEMPORARY_VARIABLE name:tmp_4 type:kotlin.Int? [val]
+            BLOCK type=kotlin.Int? origin=null
+              VAR IR_TEMPORARY_VARIABLE name:tmp_5 type:kotlin.Int? [val]
+                CALL 'public final fun <get-age> (): kotlin.Int? declared in <root>.Person.Builder' type=kotlin.Int? origin=null
+                  $this: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.build' type=<root>.Person.Builder origin=null
+              WHEN type=kotlin.Int? origin=null
+                BRANCH
+                  if: CALL 'public final fun EQEQ (arg0: kotlin.Any?, arg1: kotlin.Any?): kotlin.Boolean declared in kotlin.internal.ir' type=kotlin.Boolean origin=EQEQ
+                    arg0: GET_VAR 'val tmp_5: kotlin.Int? declared in <root>.Person.Builder.build' type=kotlin.Int? origin=null
+                    arg1: CONST Null type=kotlin.Nothing? value=null
+                  then: CONST Int type=kotlin.Int value=0
+                BRANCH
+                  if: CONST Boolean type=kotlin.Boolean value=true
+                  then: GET_VAR 'val tmp_5: kotlin.Int? declared in <root>.Person.Builder.build' type=kotlin.Int? origin=null
+          RETURN type=kotlin.Nothing from='public final fun build (): <root>.Person declared in <root>.Person.Builder'
+            CONSTRUCTOR_CALL 'private constructor <init> (name: kotlin.String, nickname: kotlin.String?, age: kotlin.Int) declared in <root>.Person' type=<root>.Person origin=null
+              name: GET_VAR 'val tmp_0: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
+              nickname: GET_VAR 'val tmp_2: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
+              age: GET_VAR 'val tmp_4: kotlin.Int? declared in <root>.Person.Builder.build' type=kotlin.Int? origin=null
+      FUN GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:setAge visibility:public modality:FINAL <> ($this:<root>.Person.Builder, age:kotlin.Int) returnType:<root>.Person.Builder
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
+        VALUE_PARAMETER GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:age index:0 type:kotlin.Int
+        BLOCK_BODY
+          CALL 'public final fun <set-age> (<set-?>: kotlin.Int?): kotlin.Unit declared in <root>.Person.Builder' type=kotlin.Unit origin=null
+            $this: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.setAge' type=<root>.Person.Builder origin=null
+            <set-?>: GET_VAR 'age: kotlin.Int declared in <root>.Person.Builder.setAge' type=kotlin.Int origin=null
+          RETURN type=kotlin.Nothing from='public final fun setAge (age: kotlin.Int): <root>.Person.Builder declared in <root>.Person.Builder'
+            GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.setAge' type=<root>.Person.Builder origin=null
+      FUN GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:setName visibility:public modality:FINAL <> ($this:<root>.Person.Builder, name:kotlin.String) returnType:<root>.Person.Builder
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
+        VALUE_PARAMETER GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:name index:0 type:kotlin.String
+        BLOCK_BODY
+          CALL 'public final fun <set-name> (<set-?>: kotlin.String?): kotlin.Unit declared in <root>.Person.Builder' type=kotlin.Unit origin=null
+            $this: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.setName' type=<root>.Person.Builder origin=null
+            <set-?>: GET_VAR 'name: kotlin.String declared in <root>.Person.Builder.setName' type=kotlin.String origin=null
+          RETURN type=kotlin.Nothing from='public final fun setName (name: kotlin.String): <root>.Person.Builder declared in <root>.Person.Builder'
+            GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.setName' type=<root>.Person.Builder origin=null
+      FUN GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:setNickname visibility:public modality:FINAL <> ($this:<root>.Person.Builder, nickname:kotlin.String?) returnType:<root>.Person.Builder
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
+        VALUE_PARAMETER GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname index:0 type:kotlin.String?
+        BLOCK_BODY
+          CALL 'public final fun <set-nickname> (<set-?>: kotlin.String?): kotlin.Unit declared in <root>.Person.Builder' type=kotlin.Unit origin=null
+            $this: GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.setNickname' type=<root>.Person.Builder origin=null
+            <set-?>: GET_VAR 'nickname: kotlin.String? declared in <root>.Person.Builder.setNickname' type=kotlin.String? origin=null
+          RETURN type=kotlin.Nothing from='public final fun setNickname (nickname: kotlin.String?): <root>.Person.Builder declared in <root>.Person.Builder'
+            GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.setNickname' type=<root>.Person.Builder origin=null
+    CONSTRUCTOR visibility:private <> (name:kotlin.String, nickname:kotlin.String?, age:kotlin.Int) returnType:<root>.Person [primary]
+      VALUE_PARAMETER name:name index:0 type:kotlin.String
+      VALUE_PARAMETER name:nickname index:1 type:kotlin.String?
+        EXPRESSION_BODY
+          GET_VAR 'name: kotlin.String declared in <root>.Person.<init>' type=kotlin.String origin=null
+      VALUE_PARAMETER name:age index:2 type:kotlin.Int
+        EXPRESSION_BODY
+          CONST Int type=kotlin.Int value=0
+      BLOCK_BODY
+        DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> () declared in kotlin.Any'
+        INSTANCE_INITIALIZER_CALL classDescriptor='CLASS CLASS name:Person modality:FINAL visibility:public superTypes:[kotlin.Any]'
+    FUN FAKE_OVERRIDE name:equals visibility:public modality:OPEN <> ($this:kotlin.Any, other:kotlin.Any?) returnType:kotlin.Boolean [fake_override,operator]
+      overridden:
+        public open fun equals (other: kotlin.Any?): kotlin.Boolean declared in kotlin.Any
+      $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+      VALUE_PARAMETER name:other index:0 type:kotlin.Any?
+    FUN FAKE_OVERRIDE name:hashCode visibility:public modality:OPEN <> ($this:kotlin.Any) returnType:kotlin.Int [fake_override]
+      overridden:
+        public open fun hashCode (): kotlin.Int declared in kotlin.Any
+      $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+    FUN FAKE_OVERRIDE name:toString visibility:public modality:OPEN <> ($this:kotlin.Any) returnType:kotlin.String [fake_override]
+      overridden:
+        public open fun toString (): kotlin.String declared in kotlin.Any
+      $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+    FUN GENERATED[com.bnorm.piecemeal.plugin.Piecemeal.Key] name:newBuilder visibility:public modality:FINAL <> ($this:<root>.Person) returnType:<root>.Person.Builder
+      $this: VALUE_PARAMETER name:<this> type:<root>.Person
+      BLOCK_BODY
+        VAR IR_TEMPORARY_VARIABLE name:tmp_6 type:<root>.Person.Builder [val]
+          CONSTRUCTOR_CALL 'public constructor <init> () declared in <root>.Person.Builder' type=<root>.Person.Builder origin=null
+        CALL 'public final fun <set-name> (<set-?>: kotlin.String?): kotlin.Unit declared in <root>.Person.Builder' type=kotlin.Unit origin=null
+          $this: GET_VAR 'val tmp_6: <root>.Person.Builder declared in <root>.Person.newBuilder' type=<root>.Person.Builder origin=null
+          <set-?>: CALL 'public final fun <get-name> (): kotlin.String declared in <root>.Person' type=kotlin.String origin=null
+            $this: GET_VAR '<this>: <root>.Person declared in <root>.Person.newBuilder' type=<root>.Person origin=null
+        CALL 'public final fun <set-nickname> (<set-?>: kotlin.String?): kotlin.Unit declared in <root>.Person.Builder' type=kotlin.Unit origin=null
+          $this: GET_VAR 'val tmp_6: <root>.Person.Builder declared in <root>.Person.newBuilder' type=<root>.Person.Builder origin=null
+          <set-?>: CALL 'public final fun <get-nickname> (): kotlin.String? declared in <root>.Person' type=kotlin.String? origin=null
+            $this: GET_VAR '<this>: <root>.Person declared in <root>.Person.newBuilder' type=<root>.Person origin=null
+        CALL 'public final fun <set-age> (<set-?>: kotlin.Int?): kotlin.Unit declared in <root>.Person.Builder' type=kotlin.Unit origin=null
+          $this: GET_VAR 'val tmp_6: <root>.Person.Builder declared in <root>.Person.newBuilder' type=<root>.Person.Builder origin=null
+          <set-?>: CALL 'public final fun <get-age> (): kotlin.Int declared in <root>.Person' type=kotlin.Int origin=null
+            $this: GET_VAR '<this>: <root>.Person declared in <root>.Person.newBuilder' type=<root>.Person origin=null
+        RETURN type=kotlin.Nothing from='public final fun newBuilder (): <root>.Person.Builder declared in <root>.Person'
+          GET_VAR 'val tmp_6: <root>.Person.Builder declared in <root>.Person.newBuilder' type=<root>.Person.Builder origin=null
+    FUN name:mutate visibility:public modality:FINAL <> ($this:<root>.Person, block:@[ExtensionFunctionType] kotlin.Function1<<root>.Person, kotlin.Unit>) returnType:kotlin.Unit
+      $this: VALUE_PARAMETER name:<this> type:<root>.Person
+      VALUE_PARAMETER name:block index:0 type:@[ExtensionFunctionType] kotlin.Function1<<root>.Person, kotlin.Unit>
+      BLOCK_BODY
+  FUN name:box visibility:public modality:FINAL <> () returnType:kotlin.String
+    BLOCK_BODY
+      RETURN type=kotlin.Nothing from='public final fun box (): kotlin.String declared in <root>'
+        CONST String type=kotlin.String value="OK"
