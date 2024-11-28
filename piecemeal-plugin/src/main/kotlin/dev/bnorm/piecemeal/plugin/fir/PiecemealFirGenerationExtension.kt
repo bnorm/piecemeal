@@ -18,6 +18,7 @@ package dev.bnorm.piecemeal.plugin.fir
 
 import dev.bnorm.piecemeal.plugin.Piecemeal
 import dev.bnorm.piecemeal.plugin.toJavaSetter
+import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.extensions.*
 import org.jetbrains.kotlin.fir.plugin.createConstructor
@@ -34,7 +35,12 @@ class PiecemealFirGenerationExtension(
   // Symbols for classes which have Piecemeal annotation.
   private val piecemealClasses by lazy {
     session.predicateBasedProvider.getSymbolsByPredicate(Piecemeal.ANNOTATION_PREDICATE)
-      .filterIsInstance<FirRegularClassSymbol>().toSet()
+      .filterIsInstance<FirRegularClassSymbol>()
+      .filter {
+        val constructor = it.declarationSymbols.filterIsInstance<FirConstructorSymbol>().singleOrNull { it.isPrimary }
+        constructor != null && constructor.rawStatus.visibility != Visibilities.Private
+      }
+      .toSet()
   }
 
   // IDs for nested Piecemeal annotated classes.

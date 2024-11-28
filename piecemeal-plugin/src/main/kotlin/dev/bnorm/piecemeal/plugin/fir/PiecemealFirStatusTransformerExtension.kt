@@ -19,11 +19,11 @@ package dev.bnorm.piecemeal.plugin.fir
 import dev.bnorm.piecemeal.plugin.Piecemeal
 import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.fir.FirSession
+import org.jetbrains.kotlin.fir.copy
 import org.jetbrains.kotlin.fir.declarations.FirConstructor
 import org.jetbrains.kotlin.fir.declarations.FirDeclaration
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationStatus
 import org.jetbrains.kotlin.fir.declarations.getAnnotationByClassId
-import org.jetbrains.kotlin.fir.declarations.impl.FirDeclarationStatusImpl
 import org.jetbrains.kotlin.fir.extensions.FirStatusTransformerExtension
 import org.jetbrains.kotlin.fir.resolve.getContainingClass
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
@@ -46,6 +46,9 @@ class PiecemealFirStatusTransformerExtension(
     containingClass: FirClassLikeSymbol<*>?,
     isLocal: Boolean
   ): FirDeclarationStatus {
-    return FirDeclarationStatusImpl(Visibilities.Private, status.modality)
+    return when (status.visibility) {
+      Visibilities.Private -> status // Keep private visibility to raise error in the checker.
+      else -> status.copy(visibility = Visibilities.PrivateToThis)
+    }
   }
 }

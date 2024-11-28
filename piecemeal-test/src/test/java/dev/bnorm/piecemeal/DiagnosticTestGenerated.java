@@ -25,4 +25,16 @@ public class DiagnosticTestGenerated extends AbstractDiagnosticTest {
   public void testBuilderResolved() {
     runTest("src/test/data/diagnostic/BuilderResolved.kt");
   }
+
+  @Test
+  @TestMetadata("NoPrimaryConstructor.kt")
+  public void testNoPrimaryConstructor() {
+    runTest("src/test/data/diagnostic/NoPrimaryConstructor.kt");
+  }
+
+  @Test
+  @TestMetadata("PrimaryConstructorVisibility.kt")
+  public void testPrimaryConstructorVisibility() {
+    runTest("src/test/data/diagnostic/PrimaryConstructorVisibility.kt");
+  }
 }

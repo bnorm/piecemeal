@@ -16,11 +16,13 @@
 
 package dev.bnorm.piecemeal.plugin.fir
 
+import dev.bnorm.piecemeal.plugin.fir.checkers.PiecemealFirAdditionalCheckersExtension
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 
 class PiecemealFirExtensionRegistrar : FirExtensionRegistrar() {
   override fun ExtensionRegistrarContext.configurePlugin() {
     +::PiecemealFirStatusTransformerExtension
     +::PiecemealFirGenerationExtension
+    +::PiecemealFirAdditionalCheckersExtension
   }
 }

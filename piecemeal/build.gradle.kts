@@ -1,36 +1,56 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
   kotlin("multiplatform")
-  `maven-publish`
+  id("org.jetbrains.dokka")
+  id("com.vanniktech.maven.publish.base")
+  id("org.jetbrains.kotlinx.binary-compatibility-validator")
 }
 
 kotlin {
   explicitApi()
 
+  androidNativeArm32()
+  androidNativeArm64()
+  androidNativeX64()
+  androidNativeX86()
+
+  iosArm64()
+  iosSimulatorArm64()
+  iosX64()
+
+  js().nodejs()
+
   jvm()
-  js {
-    browser()
-    nodejs()
-  }
 
-  val osName = System.getProperty("os.name")
-  val osArch = System.getProperty("os.arch")
-  when {
-    "Windows" in osName -> mingwX64("native")
-    "Mac OS" in osName -> when {
-      "aarch64" in osArch -> macosArm64("native")
-      else -> macosX64("native")
-    }
-    else -> linuxX64("native")
-  }
+  linuxArm64()
+  linuxX64()
 
-  sourceSets {
-    val commonMain by getting {
-    }
-  }
+  macosArm64()
+  macosX64()
+
+  mingwX64()
+
+  tvosArm64()
+  tvosSimulatorArm64()
+  tvosX64()
+
+  wasmJs().nodejs()
+  wasmWasi().nodejs()
+
+  watchosArm32()
+  watchosArm64()
+  watchosDeviceArm64()
+  watchosSimulatorArm64()
+  watchosX64()
+
+  applyDefaultHierarchyTemplate()
 }
 
-publishing {
-  repositories {
-    mavenLocal()
-  }
-}
+//configure<MavenPublishBaseExtension> {
+//  configure(
+//    KotlinMultiplatform(javadocJar = JavadocJar.Empty())
+//  )
+//}

@@ -154,7 +154,7 @@ FILE fqName:<root> fileName:/IrDumpActual.kt
                   if: CONST Boolean type=kotlin.Boolean value=true
                   then: GET_VAR 'val tmp_5: kotlin.Int? declared in <root>.Person.Builder.build' type=kotlin.Int? origin=null
           RETURN type=kotlin.Nothing from='public final fun build (): <root>.Person declared in <root>.Person.Builder'
-            CONSTRUCTOR_CALL 'private constructor <init> (name: kotlin.String, nickname: kotlin.String?, age: kotlin.Int) declared in <root>.Person' type=<root>.Person origin=null
+            CONSTRUCTOR_CALL 'private/*private to this*/ constructor <init> (name: kotlin.String, nickname: kotlin.String?, age: kotlin.Int) declared in <root>.Person' type=<root>.Person origin=null
               name: GET_VAR 'val tmp_0: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
               nickname: GET_VAR 'val tmp_2: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
               age: GET_VAR 'val tmp_4: kotlin.Int? declared in <root>.Person.Builder.build' type=kotlin.Int? origin=null
@@ -185,7 +185,7 @@ FILE fqName:<root> fileName:/IrDumpActual.kt
             <set-?>: GET_VAR 'nickname: kotlin.String? declared in <root>.Person.Builder.setNickname' type=kotlin.String? origin=null
           RETURN type=kotlin.Nothing from='public final fun setNickname (nickname: kotlin.String?): <root>.Person.Builder declared in <root>.Person.Builder'
             GET_VAR '<this>: <root>.Person.Builder declared in <root>.Person.Builder.setNickname' type=<root>.Person.Builder origin=null
-    CONSTRUCTOR visibility:private <> (name:kotlin.String, nickname:kotlin.String?, age:kotlin.Int) returnType:<root>.Person [primary]
+    CONSTRUCTOR visibility:private/*private to this*/ <> (name:kotlin.String, nickname:kotlin.String?, age:kotlin.Int) returnType:<root>.Person [primary]
       VALUE_PARAMETER name:name index:0 type:kotlin.String
       VALUE_PARAMETER name:nickname index:1 type:kotlin.String?
         EXPRESSION_BODY
@@ -228,10 +228,6 @@ FILE fqName:<root> fileName:/IrDumpActual.kt
             $this: GET_VAR '<this>: <root>.Person declared in <root>.Person.newBuilder' type=<root>.Person origin=null
         RETURN type=kotlin.Nothing from='public final fun newBuilder (): <root>.Person.Builder declared in <root>.Person'
           GET_VAR 'val tmp_6: <root>.Person.Builder declared in <root>.Person.newBuilder' type=<root>.Person.Builder origin=null
-    FUN name:mutate visibility:public modality:FINAL <> ($this:<root>.Person, block:@[ExtensionFunctionType] kotlin.Function1<<root>.Person, kotlin.Unit>) returnType:kotlin.Unit
-      $this: VALUE_PARAMETER name:<this> type:<root>.Person
-      VALUE_PARAMETER name:block index:0 type:@[ExtensionFunctionType] kotlin.Function1<<root>.Person, kotlin.Unit>
-      BLOCK_BODY
   FUN name:box visibility:public modality:FINAL <> () returnType:kotlin.String
     BLOCK_BODY
       RETURN type=kotlin.Nothing from='public final fun box (): kotlin.String declared in <root>'
