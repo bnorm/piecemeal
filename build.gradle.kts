@@ -1,5 +1,5 @@
 buildscript {
-  extra["kotlin_plugin_id"] = "com.bnorm.piecemeal.piecemeal-plugin"
+  extra["kotlin_plugin_id"] = "dev.bnorm.piecemeal.piecemeal-plugin"
 }
 
 plugins {
@@ -10,6 +10,6 @@ plugins {
 }
 
 allprojects {
-  group = "com.bnorm.piecemeal"
+  group = "dev.bnorm.piecemeal"
   version = "0.1.0-SNAPSHOT"
 }

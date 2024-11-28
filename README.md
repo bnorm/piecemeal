@@ -6,7 +6,7 @@
 Kotlin FIR+IR plugin for generating a class builder.
 
 ```kotlin
-import com.bnorm.piecemeal.Piecemeal
+import dev.bnorm.piecemeal.Piecemeal
 
 @Piecemeal
 class Person(

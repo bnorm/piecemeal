@@ -1,6 +1,6 @@
 // DUMP_IR
 
-import com.bnorm.piecemeal.Piecemeal
+import dev.bnorm.piecemeal.Piecemeal
 
 fun box() = "OK"
 

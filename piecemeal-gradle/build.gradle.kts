@@ -1,6 +1,6 @@
 plugins {
-  id("java-gradle-plugin")
   kotlin("jvm")
+  id("java-gradle-plugin")
   id("com.github.gmazzo.buildconfig")
   `maven-publish`
 }
@@ -10,17 +10,18 @@ dependencies {
 }
 
 buildConfig {
-  val project = project(":piecemeal-plugin")
   packageName(project.group.toString())
-  buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${rootProject.extra["kotlin_plugin_id"]}\"")
-  buildConfigField("String", "KOTLIN_PLUGIN_GROUP", "\"${project.group}\"")
-  buildConfigField("String", "KOTLIN_PLUGIN_NAME", "\"${project.name}\"")
-  buildConfigField("String", "KOTLIN_PLUGIN_VERSION", "\"${project.version}\"")
 
-  val supportProject = project(":piecemeal")
-  buildConfigField("String", "SUPPORT_LIBRARY_GROUP", "\"${supportProject.group}\"")
-  buildConfigField("String", "SUPPORT_LIBRARY_NAME", "\"${supportProject.name}\"")
-  buildConfigField("String", "SUPPORT_LIBRARY_VERSION", "\"${supportProject.version}\"")
+  val pluginProject = project(":piecemeal-plugin")
+  buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${rootProject.extra["kotlin_plugin_id"]}\"")
+  buildConfigField("String", "KOTLIN_PLUGIN_GROUP", "\"${pluginProject.group}\"")
+  buildConfigField("String", "KOTLIN_PLUGIN_NAME", "\"${pluginProject.name}\"")
+  buildConfigField("String", "KOTLIN_PLUGIN_VERSION", "\"${pluginProject.version}\"")
+
+  val libraryProject = project(":piecemeal")
+  buildConfigField("String", "SUPPORT_LIBRARY_GROUP", "\"${libraryProject.group}\"")
+  buildConfigField("String", "SUPPORT_LIBRARY_NAME", "\"${libraryProject.name}\"")
+  buildConfigField("String", "SUPPORT_LIBRARY_VERSION", "\"${libraryProject.version}\"")
 }
 
 gradlePlugin {
@@ -29,7 +30,7 @@ gradlePlugin {
       id = rootProject.extra["kotlin_plugin_id"] as String
       displayName = "Piecemeal"
       description = "Piecemeal"
-      implementationClass = "com.bnorm.piecemeal.PiecemealGradlePlugin"
+      implementationClass = "dev.bnorm.piecemeal.PiecemealGradlePlugin"
     }
   }
 }

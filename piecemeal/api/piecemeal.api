@@ -1,0 +1,3 @@
+public abstract interface annotation class dev/bnorm/piecemeal/Piecemeal : java/lang/annotation/Annotation {
+}
+

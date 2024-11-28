@@ -1,6 +1,6 @@
 plugins {
-  java
   kotlin("jvm")
+  java
 }
 
 val piecemealRuntimeClasspath: Configuration by configurations.creating
@@ -38,7 +38,7 @@ tasks.withType<Test> {
 
 tasks.create<JavaExec>("generateTests") {
   classpath = sourceSets.test.get().runtimeClasspath
-  mainClass.set("com.bnorm.piecemeal.GenerateTestsKt")
+  mainClass.set("dev.bnorm.piecemeal.GenerateTestsKt")
 
   inputs.dir(layout.projectDirectory.dir("src/test/data"))
     .withPropertyName("testData")

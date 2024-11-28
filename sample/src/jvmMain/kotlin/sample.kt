@@ -1,4 +1,4 @@
-import com.bnorm.piecemeal.Piecemeal
+import dev.bnorm.piecemeal.Piecemeal
 
 @Piecemeal
 class Person(

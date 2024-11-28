@@ -1,6 +1,6 @@
 plugins {
   kotlin("multiplatform") version "2.0.0-RC1"
-  id("com.bnorm.piecemeal.piecemeal-plugin") version "0.1.0-SNAPSHOT"
+  id("dev.bnorm.piecemeal.piecemeal-plugin") version "0.1.0-SNAPSHOT"
 }
 
 kotlin {
@@ -25,7 +25,7 @@ kotlin {
     val commonMain by getting {
       dependencies {
         // Required for Gradle dependency substitution.
-        implementation("com.bnorm.piecemeal:piecemeal:0.1.0-SNAPSHOT")
+        implementation("dev.bnorm.piecemeal:piecemeal:0.1.0-SNAPSHOT")
       }
     }
     val commonTest by getting {
