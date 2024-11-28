@@ -1,8 +1,11 @@
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinJvm
+
 plugins {
   kotlin("jvm")
   kotlin("kapt")
   id("com.github.gmazzo.buildconfig")
-  `maven-publish`
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
@@ -13,18 +16,16 @@ dependencies {
 }
 
 buildConfig {
+  useKotlinOutput {
+    internalVisibility = true
+  }
+
   packageName(group.toString())
   buildConfigField("String", "KOTLIN_PLUGIN_ID", "\"${rootProject.extra["kotlin_plugin_id"]}\"")
 }
 
-publishing {
-  publications {
-    create<MavenPublication>("default") {
-      from(components["java"])
-    }
-  }
-
-  repositories {
-    mavenLocal()
-  }
+mavenPublishing {
+  configure(
+    KotlinJvm(javadocJar = JavadocJar.Empty())
+  )
 }

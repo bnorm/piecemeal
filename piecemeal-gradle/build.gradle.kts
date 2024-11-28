@@ -1,8 +1,11 @@
+import com.vanniktech.maven.publish.GradlePlugin
+import com.vanniktech.maven.publish.JavadocJar
+
 plugins {
   kotlin("jvm")
-  id("java-gradle-plugin")
   id("com.github.gmazzo.buildconfig")
-  `maven-publish`
+  id("java-gradle-plugin")
+  id("com.vanniktech.maven.publish.base")
 }
 
 dependencies {
@@ -35,8 +38,8 @@ gradlePlugin {
   }
 }
 
-publishing {
-  repositories {
-    mavenLocal()
-  }
+mavenPublishing {
+  configure(
+    GradlePlugin(javadocJar = JavadocJar.Empty())
+  )
 }
