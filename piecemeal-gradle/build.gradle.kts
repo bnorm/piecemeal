@@ -18,8 +18,9 @@ tasks.withType<Test> {
   useJUnitPlatform()
 
   systemProperty("piecemealVersion", project.version)
-  dependsOn(":piecemeal-gradle:publishAllPublicationsToTestMavenRepository")
+  dependsOn(":piecemeal:publishAllPublicationsToTestMavenRepository")
   dependsOn(":piecemeal-plugin:publishAllPublicationsToTestMavenRepository")
+  dependsOn(":piecemeal-gradle:publishAllPublicationsToTestMavenRepository")
 }
 
 buildConfig {
