@@ -45,7 +45,7 @@ class PiecemealGradlePlugin : KotlinCompilerPluginSupportPlugin {
     val project = kotlinCompilation.target.project
 
     kotlinCompilation.dependencies {
-      compileOnly("${BuildConfig.SUPPORT_LIBRARY_GROUP}:${BuildConfig.SUPPORT_LIBRARY_NAME}:${BuildConfig.SUPPORT_LIBRARY_VERSION}")
+      implementation("${BuildConfig.SUPPORT_LIBRARY_GROUP}:${BuildConfig.SUPPORT_LIBRARY_NAME}:${BuildConfig.SUPPORT_LIBRARY_VERSION}")
     }
 
     return project.provider { emptyList() }

@@ -1,0 +1,12 @@
+# Kotlin
+.kotlin/
+kotlin-js-store/
+
+# Gradle
+build/
+.gradle/
+
+# IDEA
+out/
+.idea/
+*.iml

@@ -10,6 +10,16 @@ plugins {
 
 dependencies {
   implementation(kotlin("gradle-plugin-api"))
+
+  testImplementation(kotlin("test-junit5"))
+}
+
+tasks.withType<Test> {
+  useJUnitPlatform()
+
+  systemProperty("piecemealVersion", project.version)
+  dependsOn(":piecemeal-gradle:publishAllPublicationsToTestMavenRepository")
+  dependsOn(":piecemeal-plugin:publishAllPublicationsToTestMavenRepository")
 }
 
 buildConfig {
