@@ -15,6 +15,15 @@ FILE: BuilderResolved.kt
 
         public final fun newBuilder(): R|Person.Builder|
 
+        public final companion object Companion : R|kotlin/Any| {
+            public final fun build(builder: R|Person.Builder.() -> kotlin/Unit|): R|Person|
+
+            private constructor(): R|Person.Companion| {
+                super<R|kotlin/Any|>()
+            }
+
+        }
+
         public final class Builder : R|kotlin/Any| {
             public final var name: R|kotlin/String?|
                 public get(): R|kotlin/String?|
@@ -51,10 +60,8 @@ FILE: BuilderResolved.kt
         ).R|/Person.Builder.build|()
     }
     public final fun person3(): R|Person| {
-        ^person3 R|/Person|(<L> = Person@fun R|Person.Builder|.<anonymous>(): R|kotlin/Unit| <inline=NoInline>  {
+        ^person3 Q|Person|.R|/Person.Companion.build|(<L> = build@fun R|Person.Builder|.<anonymous>(): R|kotlin/Unit| <inline=NoInline>  {
             this@R|special/anonymous|.R|/Person.Builder.name| = String(John)
         }
         )
     }
-FILE: __GENERATED DECLARATIONS__.kt
-    public final fun Person(builder: R|Person.Builder.() -> kotlin/Unit|): R|Person|

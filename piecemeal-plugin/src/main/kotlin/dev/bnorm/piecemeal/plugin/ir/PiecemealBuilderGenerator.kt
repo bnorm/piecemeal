@@ -37,7 +37,6 @@ import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.util.deepCopyWithoutPatchingParents
 import org.jetbrains.kotlin.ir.util.functions
-import org.jetbrains.kotlin.ir.util.isTopLevel
 import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
@@ -66,12 +65,12 @@ class PiecemealBuilderGenerator(
       require(declaration.body == null)
       declaration.body = when (declaration.name) {
         Name.identifier("newBuilder") -> generateNewBuilderFunction(declaration)
-        Name.identifier("build") -> generateBuildFunction(declaration)
-        else -> when {
-          declaration.isPropertyAccessor -> return
-          declaration.isTopLevel -> generateBuilderFunction(declaration)
-          else -> generateBuilderSetter(declaration)
+        Name.identifier("build") -> when {
+          (declaration.parent as? IrClass)?.isCompanion == true -> generateBuilderFunction(declaration)
+          else -> generateBuildFunction(declaration)
         }
+
+        else -> generateBuilderSetter(declaration)
       }
     }
   }
@@ -79,8 +78,9 @@ class PiecemealBuilderGenerator(
   override fun visitConstructor(declaration: IrConstructor) {
     val origin = declaration.origin
     if (origin is IrDeclarationOrigin.GeneratedByPlugin && origin.pluginKey == Piecemeal.Key) {
-      require(declaration.body == null)
-      declaration.body = generateBuilderConstructor(declaration)
+      if (declaration.body == null) {
+        declaration.body = generateDefaultConstructor(declaration)
+      }
     }
   }
 
@@ -186,9 +186,9 @@ class PiecemealBuilderGenerator(
     }
   }
 
-  private fun generateBuilderConstructor(declaration: IrConstructor): IrBody? {
-    val builderType = declaration.returnType as? IrSimpleType ?: return null
-    val builderClass = declaration.parent as? IrClass ?: return null
+  private fun generateDefaultConstructor(declaration: IrConstructor): IrBody? {
+    val returnType = declaration.returnType as? IrSimpleType ?: return null
+    val parentClass = declaration.parent as? IrClass ?: return null
     val anySymbol = context.irBuiltIns.anyClass.owner.primaryConstructor?.symbol ?: return null
 
     val irBuilder = DeclarationIrBuilder(context, declaration.symbol)
@@ -202,15 +202,15 @@ class PiecemealBuilderGenerator(
       )
       +IrInstanceInitializerCallImpl(
         UNDEFINED_OFFSET, UNDEFINED_OFFSET,
-        builderClass.symbol,
-        builderType,
+        parentClass.symbol,
+        returnType,
       )
     }
   }
 
   /**
    * ```kotlin
-   * fun Person(builder: Person.Builder.() -> Unit): Person {
+   * fun build(builder: Person.Builder.() -> Unit): Person {
    *     val tmp = Builder()
    *     tmp.builder()
    *     return tmp

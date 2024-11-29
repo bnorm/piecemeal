@@ -1,11 +1,11 @@
 plugins {
-  kotlin("multiplatform") version "2.0.0-RC1"
-  id("dev.bnorm.piecemeal.piecemeal-plugin") version "0.1.0-SNAPSHOT"
+  kotlin("multiplatform")
+  id("dev.bnorm.piecemeal")
 }
 
 kotlin {
   jvm()
-  js(IR) {
+  js {
     browser()
     nodejs()
   }
@@ -19,37 +19,6 @@ kotlin {
       else -> macosX64("native")
     }
     else -> linuxX64("native")
-  }
-
-  sourceSets {
-    val commonMain by getting {
-      dependencies {
-        // Required for Gradle dependency substitution.
-        implementation("dev.bnorm.piecemeal:piecemeal:0.1.0-SNAPSHOT")
-      }
-    }
-    val commonTest by getting {
-      dependencies {
-        implementation(kotlin("test-common"))
-        implementation(kotlin("test-annotations-common"))
-      }
-    }
-    val jvmTest by getting {
-      dependencies {
-        implementation(kotlin("test-junit5"))
-      }
-    }
-    val jsTest by getting {
-      dependencies {
-        implementation(kotlin("test-js"))
-      }
-    }
-    val nativeMain by getting {
-      dependsOn(commonMain)
-    }
-    val nativeTest by getting {
-      dependsOn(commonTest)
-    }
   }
 }
 

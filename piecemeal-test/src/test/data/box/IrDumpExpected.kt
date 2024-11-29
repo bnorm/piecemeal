@@ -15,6 +15,15 @@ class Person private constructor(
     return builder
   }
 
+  companion object {
+    @JvmSynthetic // Hide from Java callers who should use Builder.
+    fun build(builder: Person.Builder.() -> Unit): Person {
+      val tmp = Person.Builder()
+      builder.invoke(tmp)
+      return tmp.build()
+    }
+  }
+
   class Builder {
     @set:JvmSynthetic // Hide 'void' setter from Java.
     var name: String? = null
@@ -51,11 +60,4 @@ class Person private constructor(
       return this
     }
   }
-}
-
-@JvmSynthetic // Hide from Java callers who should use Builder.
-fun Person(builder: Person.Builder.() -> Unit): Person {
-  val tmp = Person.Builder()
-  builder.invoke(tmp)
-  return tmp.build()
 }

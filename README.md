@@ -32,6 +32,13 @@ class Person private constructor(
         builder.age = age
         return builder
     }
+    
+    companion object {
+        @JvmSynthetic // Hide from Java callers who should use Builder.
+        fun build(builder: Person.Builder.() -> Unit): Person {
+            return Builder().apply(builder).build()
+        }
+    }
 
     class Builder {
         @set:JvmSynthetic // Hide 'void' setter from Java.
@@ -70,11 +77,6 @@ class Person private constructor(
             )
         }
     }
-}
-
-@JvmSynthetic // Hide from Java callers who should use Builder.
-fun Person(builder: Person.Builder.() -> Unit): Person {
-    return Person.Builder().apply(builder).build()
 }
 ```
 

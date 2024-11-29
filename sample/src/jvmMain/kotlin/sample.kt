@@ -22,7 +22,7 @@ fun main() {
     .build()
   println(brian)
 
-  var melinda = Person {
+  var melinda = Person.build {
     name = "Melinda"
   }
   println(melinda)

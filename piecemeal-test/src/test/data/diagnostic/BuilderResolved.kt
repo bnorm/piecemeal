@@ -22,7 +22,7 @@ fun person2(): Person {
 }
 
 fun person3(): Person {
-  return Person {
+  return Person.build {
     name = "John"
   }
 }

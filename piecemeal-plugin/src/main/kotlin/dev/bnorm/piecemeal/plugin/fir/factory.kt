@@ -26,17 +26,13 @@ import org.jetbrains.kotlin.fir.extensions.FirExtension
 import org.jetbrains.kotlin.fir.plugin.createConeType
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
-import org.jetbrains.kotlin.fir.plugin.createTopLevelFunction
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirValueParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
-import org.jetbrains.kotlin.name.CallableId
-import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.name.*
 
 val BUILDER_CLASS_NAME = Name.identifier("Builder")
 
@@ -45,7 +41,8 @@ val BUILD_FUN_NAME = Name.identifier("build")
 
 val FUNCTION1 = ClassId(FqName("kotlin"), Name.identifier("Function1"))
 
-val ClassId.builder get() = createNestedClassId(BUILDER_CLASS_NAME)
+val ClassId.builder: ClassId get() = createNestedClassId(BUILDER_CLASS_NAME)
+val ClassId.companion: ClassId get() = createNestedClassId(SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT)
 
 fun Name.toParameterName(): Name {
   return asString().removePrefix("set").let { name ->
@@ -147,15 +144,17 @@ fun FirExtension.createPropertyBuilderValue(
 
 @OptIn(ExperimentalTopLevelDeclarationsGenerationApi::class)
 fun FirExtension.createFunPiecemealDsl(
-  piecemealClassSymbol: FirRegularClassSymbol,
+  companionClassSymbol: FirClassSymbol<*>,
   callableId: CallableId,
 ): FirSimpleFunction? {
-  val builderClassId = piecemealClassSymbol.classId.builder
-  val builderClassSymbol = session.findClassSymbol(builderClassId) ?: return null
+  val piecemealClassId = companionClassSymbol.classId.outerClassId!!
+  val piecemealClassSymbol = session.findClassSymbol(piecemealClassId)!!
+  val builderClassSymbol = session.findClassSymbol(piecemealClassId.builder) ?: return null
   val builderType = fun1Ext(session, receiver = builderClassSymbol)
-  return createTopLevelFunction(
+  return createMemberFunction(
+    owner = companionClassSymbol,
     key = Piecemeal.Key,
-    callableId = callableId,
+    name = callableId.callableName,
     returnType = piecemealClassSymbol.constructStarProjectedType(),
   ) {
     valueParameter(Name.identifier("builder"), builderType)

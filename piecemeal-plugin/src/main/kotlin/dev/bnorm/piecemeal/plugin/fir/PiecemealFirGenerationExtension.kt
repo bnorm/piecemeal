@@ -21,7 +21,9 @@ import dev.bnorm.piecemeal.plugin.toJavaSetter
 import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.extensions.*
+import org.jetbrains.kotlin.fir.plugin.createCompanionObject
 import org.jetbrains.kotlin.fir.plugin.createConstructor
+import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
 import org.jetbrains.kotlin.fir.plugin.createNestedClass
 import org.jetbrains.kotlin.fir.symbols.impl.*
 import org.jetbrains.kotlin.name.CallableId
@@ -49,6 +51,11 @@ class PiecemealFirGenerationExtension(
   }
 
   // IDs for nested Builder classes.
+  private val piecemealCompanionClassIds by lazy {
+    piecemealClasses.map { it.classId.companion }.toSet()
+  }
+
+  // IDs for nested Builder classes.
   private val builderClassIds by lazy {
     piecemealClasses.map { it.classId.builder }.toSet()
   }
@@ -61,32 +68,31 @@ class PiecemealFirGenerationExtension(
     callableId: CallableId,
     context: MemberGenerationContext?,
   ): List<FirNamedFunctionSymbol> {
-    val owner = context?.owner
-    val piecemealClass = piecemealClasses.singleOrNull {
-      it.name == callableId.callableName && it.classId.packageFqName == callableId.packageName
-    }
+    val owner = context?.owner ?: return emptyList()
 
     val function = when {
-      piecemealClass != null -> createFunPiecemealDsl(
-        piecemealClassSymbol = piecemealClass,
-        callableId = callableId,
-      )
 
       callableId.classId in piecemealClassIds && callableId.callableName == NEW_BUILDER_FUN_NAME ->
         createFunNewBuilder(
-          piecemealClassSymbol = owner ?: return emptyList(),
+          piecemealClassSymbol = owner,
+          callableId = callableId,
+        )
+
+      callableId.classId in piecemealCompanionClassIds && callableId.callableName == BUILD_FUN_NAME ->
+        createFunPiecemealDsl(
+          companionClassSymbol = owner,
           callableId = callableId,
         )
 
       callableId.classId in builderClassIds ->
         when (callableId.callableName) {
           BUILD_FUN_NAME -> createFunBuilderBuild(
-            builderClassSymbol = owner ?: return emptyList(),
+            builderClassSymbol = owner,
             callableId = callableId,
           )
 
           else -> createFunBuilderSetter(
-            builderClassSymbol = owner ?: return emptyList(),
+            builderClassSymbol = owner,
             callableId = callableId,
           )
         }
@@ -109,24 +115,24 @@ class PiecemealFirGenerationExtension(
     return emptyList()
   }
 
-  override fun generateNestedClassLikeDeclaration(
-    owner: FirClassSymbol<*>,
-    name: Name,
-    context: NestedClassGenerationContext
-  ): FirClassLikeSymbol<*>? {
-    if (owner !in piecemealClasses) return null
-    return createNestedClass(owner, name, Piecemeal.Key).symbol
-  }
-
   override fun generateConstructors(context: MemberGenerationContext): List<FirConstructorSymbol> {
     val ownerClassId = context.owner.classId
-    assert(ownerClassId in builderClassIds)
-    return listOf(createConstructor(context.owner, Piecemeal.Key, isPrimary = true).symbol)
+    val constructor = when {
+      ownerClassId in builderClassIds ->
+        createConstructor(context.owner, Piecemeal.Key, isPrimary = true)
+
+      ownerClassId in piecemealCompanionClassIds ->
+        createDefaultPrivateConstructor(context.owner, Piecemeal.Key)
+
+      else -> error("Can't generate constructor for ${ownerClassId.asSingleFqName()}")
+    }
+    return listOf(constructor.symbol)
   }
 
   override fun getCallableNamesForClass(classSymbol: FirClassSymbol<*>, context: MemberGenerationContext): Set<Name> {
     return when {
       classSymbol in piecemealClasses -> setOf(NEW_BUILDER_FUN_NAME)
+      classSymbol.classId in piecemealCompanionClassIds -> setOf(BUILD_FUN_NAME, SpecialNames.INIT)
       classSymbol.classId in builderClassIds -> {
         val builderClassId = classSymbol.classId.outerClassId!!
         val piecemealClass = session.findClassSymbol(builderClassId)!!
@@ -140,21 +146,33 @@ class PiecemealFirGenerationExtension(
     }
   }
 
-  override fun getTopLevelCallableIds(): Set<CallableId> {
-    // TODO what about nested classes? nest within parent class?
-    return piecemealClasses
-      .filter { !it.classId.isNestedClass }
-      .map { CallableId(it.classId.packageFqName, it.classId.shortClassName) }
-      .toSet()
-  }
-
   override fun getNestedClassifiersNames(
     classSymbol: FirClassSymbol<*>,
     context: NestedClassGenerationContext,
   ): Set<Name> {
     return when (classSymbol) {
-      in piecemealClasses -> setOf(BUILDER_CLASS_NAME)
+      in piecemealClasses -> setOf(BUILDER_CLASS_NAME, SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT)
       else -> emptySet()
     }
+  }
+
+  override fun generateNestedClassLikeDeclaration(
+    owner: FirClassSymbol<*>,
+    name: Name,
+    context: NestedClassGenerationContext
+  ): FirClassLikeSymbol<*>? {
+    if (owner !is FirRegularClassSymbol) return null
+    if (owner !in piecemealClasses) return null
+    return when (name) {
+      BUILDER_CLASS_NAME -> createNestedClass(owner, name, Piecemeal.Key).symbol
+      SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT -> generateCompanionDeclaration(owner)
+      else -> error("Can't generate class ${owner.classId.createNestedClassId(name).asSingleFqName()}")
+    }
+  }
+
+  private fun generateCompanionDeclaration(owner: FirRegularClassSymbol): FirRegularClassSymbol? {
+    if (owner.companionObjectSymbol != null) return null
+    val companion = createCompanionObject(owner, Piecemeal.Key)
+    return companion.symbol
   }
 }
