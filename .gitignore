@@ -7,5 +7,6 @@ build/
 
 # IDEA
 out/
-.idea/
+**/.idea/*
+!.idea/kotlinTestDataPluginTestDataPaths.xml
 *.iml
