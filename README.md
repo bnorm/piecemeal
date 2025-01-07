@@ -83,4 +83,8 @@ class Person private constructor(
 ## Various References
 
 - https://jakewharton.com/public-api-challenges-in-kotlin/
-- https://github.com/ZacSweers/redacted-compiler-plugin/pull/86
+
+## Development
+
+When working with compiler tests, 
+it is recommended to use [Kotlin Compiler Test Helper](https://github.com/demiurg906/test-data-helper-plugin).

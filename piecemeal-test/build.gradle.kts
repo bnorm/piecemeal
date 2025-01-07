@@ -26,6 +26,8 @@ tasks.withType<Test> {
     .withPropertyName("testData")
     .withPathSensitivity(PathSensitivity.RELATIVE)
 
+  workingDir = rootDir
+
   useJUnitPlatform()
   doFirst {
     systemProperty("piecemealRuntime.classpath", piecemealRuntimeClasspath.asPath)
@@ -39,6 +41,7 @@ tasks.withType<Test> {
 tasks.create<JavaExec>("generateTests") {
   classpath = sourceSets.test.get().runtimeClasspath
   mainClass.set("dev.bnorm.piecemeal.GenerateTestsKt")
+  workingDir = rootDir
 
   inputs.dir(layout.projectDirectory.dir("src/test/data"))
     .withPropertyName("testData")
