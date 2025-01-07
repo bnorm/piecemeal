@@ -61,7 +61,7 @@ fun fun1Ext(
     session = session,
     typeArguments = arrayOf(
       receiver.constructStarProjectedType(),
-      session.builtinTypes.unitType.type,
+      session.builtinTypes.unitType.coneType,
     )
   ).withAttributes(ConeAttributes.create(listOf(CompilerConeAttributes.ExtensionFunctionType)))
 }
@@ -135,7 +135,7 @@ fun FirExtension.createPropertyBuilderValue(
     owner = builderClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
-    returnType = parameter.resolvedReturnType.withNullability(ConeNullability.NULLABLE, session.typeContext),
+    returnType = parameter.resolvedReturnType.withNullability(nullable = true, session.typeContext),
     isVal = false
   )
 
