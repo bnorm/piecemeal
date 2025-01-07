@@ -33,7 +33,7 @@ class PiecemealFirStatusTransformerExtension(
 ) : FirStatusTransformerExtension(session) {
   override fun needTransformStatus(declaration: FirDeclaration): Boolean {
     if (declaration is FirConstructor && declaration.isPrimary) {
-      val containingClass = declaration.getContainingClass(session)
+      val containingClass = declaration.getContainingClass()
       val annotation = containingClass?.getAnnotationByClassId(Piecemeal.ANNOTATION_CLASS_ID, session)
       return annotation != null
     }

@@ -198,7 +198,6 @@ class PiecemealBuilderGenerator(
         context.irBuiltIns.anyType,
         anySymbol,
         typeArgumentsCount = 0,
-        valueArgumentsCount = 0
       )
       +IrInstanceInitializerCallImpl(
         UNDEFINED_OFFSET, UNDEFINED_OFFSET,
