@@ -1,6 +1,7 @@
 plugins {
   kotlin("multiplatform")
   id("dev.bnorm.piecemeal")
+  id("dev.drewhamilton.poko")
 }
 
 kotlin {
