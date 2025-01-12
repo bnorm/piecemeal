@@ -154,7 +154,7 @@ FILE fqName:<root> fileName:/IrDumpActual.kt
                   if: CONST Boolean type=kotlin.Boolean value=true
                   then: GET_VAR 'val tmp_5: kotlin.Int? declared in <root>.Person.Builder.build' type=kotlin.Int? origin=null
           RETURN type=kotlin.Nothing from='public final fun build (): <root>.Person declared in <root>.Person.Builder'
-            CONSTRUCTOR_CALL 'private/*private to this*/ constructor <init> (name: kotlin.String, nickname: kotlin.String?, age: kotlin.Int) declared in <root>.Person' type=<root>.Person origin=null
+            CONSTRUCTOR_CALL 'private constructor <init> (name: kotlin.String, nickname: kotlin.String?, age: kotlin.Int) declared in <root>.Person' type=<root>.Person origin=null
               name: GET_VAR 'val tmp_0: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
               nickname: GET_VAR 'val tmp_2: kotlin.String? declared in <root>.Person.Builder.build' type=kotlin.String? origin=null
               age: GET_VAR 'val tmp_4: kotlin.Int? declared in <root>.Person.Builder.build' type=kotlin.Int? origin=null
@@ -216,7 +216,7 @@ FILE fqName:<root> fileName:/IrDumpActual.kt
           RETURN type=kotlin.Nothing from='public final fun build (builder: @[ExtensionFunctionType] kotlin.Function1<<root>.Person.Builder, kotlin.Unit>): <root>.Person declared in <root>.Person.Companion'
             CALL 'public final fun build (): <root>.Person declared in <root>.Person.Builder' type=<root>.Person origin=null
               $this: GET_VAR 'val tmp_6: <root>.Person.Builder declared in <root>.Person.Companion.build' type=<root>.Person.Builder origin=null
-    CONSTRUCTOR visibility:private/*private to this*/ <> (name:kotlin.String, nickname:kotlin.String?, age:kotlin.Int) returnType:<root>.Person [primary]
+    CONSTRUCTOR visibility:private <> (name:kotlin.String, nickname:kotlin.String?, age:kotlin.Int) returnType:<root>.Person [primary]
       VALUE_PARAMETER name:name index:0 type:kotlin.String
       VALUE_PARAMETER name:nickname index:1 type:kotlin.String?
         EXPRESSION_BODY

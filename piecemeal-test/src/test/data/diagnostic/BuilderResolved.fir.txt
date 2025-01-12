@@ -1,6 +1,6 @@
 FILE: BuilderResolved.kt
     @R|dev/bnorm/piecemeal/Piecemeal|() public final class Person : R|kotlin/Any| {
-        private/*private to this*/ constructor(name: R|kotlin/String|, nickname: R|kotlin/String?| = R|<local>/name|, age: R|kotlin/Int| = Int(0)): R|Person| {
+        private constructor(name: R|kotlin/String|, nickname: R|kotlin/String?| = R|<local>/name|, age: R|kotlin/Int| = Int(0)): R|Person| {
             super<R|kotlin/Any|>()
         }
 
