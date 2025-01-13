@@ -1,5 +1,6 @@
 package dev.bnorm.piecemeal
 
+import dev.bnorm.piecemeal.plugin.PiecemealConfiguration
 import dev.bnorm.piecemeal.plugin.fir.PiecemealFirExtensionRegistrar
 import dev.bnorm.piecemeal.plugin.ir.PiecemealIrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
@@ -18,6 +19,8 @@ fun TestConfigurationBuilder.configurePlugin() {
     ::RuntimeEnvironmentConfigurator,
   )
 
+  useDirectives(PiecemealDirectives)
+
   useCustomRuntimeClasspathProviders(
     ::RuntimeRuntimeClassPathProvider,
   )
@@ -29,7 +32,10 @@ class PiecemealExtensionRegistrarConfigurator(testServices: TestServices) : Envi
     module: TestModule,
     configuration: CompilerConfiguration,
   ) {
-    FirExtensionRegistrarAdapter.registerExtension(PiecemealFirExtensionRegistrar())
+    val configuration = PiecemealConfiguration(
+      enableJavaSetters = PiecemealDirectives.ENABLE_JAVA_SETTERS in module.directives,
+    )
+    FirExtensionRegistrarAdapter.registerExtension(PiecemealFirExtensionRegistrar(configuration))
     IrGenerationExtension.registerExtension(PiecemealIrGenerationExtension())
   }
 }

@@ -22,9 +22,15 @@ public class BoxTestGenerated extends AbstractBoxTest {
   }
 
   @Test
-  @TestMetadata("IrDumpActual.kt")
-  public void testIrDumpActual() {
-    runTest("piecemeal-test/src/test/data/box/IrDumpActual.kt");
+  @TestMetadata("Builder.kt")
+  public void testBuilder() {
+    runTest("piecemeal-test/src/test/data/box/Builder.kt");
+  }
+
+  @Test
+  @TestMetadata("BuilderWithSetters.kt")
+  public void testBuilderWithSetters() {
+    runTest("piecemeal-test/src/test/data/box/BuilderWithSetters.kt");
   }
 
   @Test

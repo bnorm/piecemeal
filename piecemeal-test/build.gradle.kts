@@ -22,6 +22,7 @@ dependencies {
 }
 
 tasks.withType<Test> {
+  dependsOn(piecemealRuntimeClasspath)
   inputs.dir(layout.projectDirectory.dir("src/test/data"))
     .withPropertyName("testData")
     .withPathSensitivity(PathSensitivity.RELATIVE)
@@ -29,9 +30,8 @@ tasks.withType<Test> {
   workingDir = rootDir
 
   useJUnitPlatform()
-  doFirst {
-    systemProperty("piecemealRuntime.classpath", piecemealRuntimeClasspath.asPath)
-  }
+
+  systemProperty("piecemealRuntime.classpath", piecemealRuntimeClasspath.asPath)
 
   // Properties required to run the internal test framework.
   systemProperty("idea.ignore.disabled.plugins", "true")

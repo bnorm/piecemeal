@@ -25,8 +25,8 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
 @Suppress("unused") // Used via reflection
 class PiecemealGradlePlugin : KotlinCompilerPluginSupportPlugin {
-  override fun apply(target: Project): Unit = with(target) {
-    extensions.create("piecemeal", PiecemealGradleExtension::class.java)
+  override fun apply(target: Project) {
+    target.extensions.create("piecemeal", PiecemealGradleExtension::class.java)
   }
 
   override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
@@ -36,18 +36,26 @@ class PiecemealGradlePlugin : KotlinCompilerPluginSupportPlugin {
   override fun getPluginArtifact(): SubpluginArtifact = SubpluginArtifact(
     groupId = BuildConfig.KOTLIN_PLUGIN_GROUP,
     artifactId = BuildConfig.KOTLIN_PLUGIN_NAME,
-    version = BuildConfig.KOTLIN_PLUGIN_VERSION
+    version = BuildConfig.KOTLIN_PLUGIN_VERSION,
   )
 
   override fun applyToCompilation(
     kotlinCompilation: KotlinCompilation<*>
   ): Provider<List<SubpluginOption>> {
     val project = kotlinCompilation.target.project
+    val extension = project.extensions.getByType(PiecemealGradleExtension::class.java)
 
     kotlinCompilation.dependencies {
       implementation("${BuildConfig.SUPPORT_LIBRARY_GROUP}:${BuildConfig.SUPPORT_LIBRARY_NAME}:${BuildConfig.SUPPORT_LIBRARY_VERSION}")
     }
 
-    return project.provider { emptyList() }
+    return project.provider {
+      listOf(
+        SubpluginOption(
+          key = "enableJavaSetters",
+          value = extension.enableJavaSetters.get().toString(),
+        ),
+      )
+    }
   }
 }

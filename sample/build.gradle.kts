@@ -26,3 +26,7 @@ kotlin {
 tasks.withType<Test> {
   useJUnitPlatform()
 }
+
+piecemeal {
+  enableJavaSetters = true
+}

@@ -16,16 +16,38 @@
 
 package dev.bnorm.piecemeal.plugin
 
-import dev.bnorm.piecemeal.BuildConfig
 import com.google.auto.service.AutoService
+import dev.bnorm.piecemeal.BuildConfig
+import org.jetbrains.kotlin.compiler.plugin.AbstractCliOption
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
+import org.jetbrains.kotlin.config.CompilerConfiguration
 
 @OptIn(ExperimentalCompilerApi::class)
 @Suppress("unused") // Used via reflection
 @AutoService(CommandLineProcessor::class)
 class PiecemealCommandLineProcessor : CommandLineProcessor {
+  companion object {
+    val ENABLE_JAVA_SETTERS = CliOption(
+      optionName = "enableJavaSetters",
+      valueDescription = "<boolean>",
+      description = "Enable Java setter generation.",
+      required = false,
+      allowMultipleOccurrences = false,
+    )
+  }
+
   override val pluginId: String = BuildConfig.KOTLIN_PLUGIN_ID
-  override val pluginOptions: Collection<CliOption> = emptyList()
+
+  override val pluginOptions: Collection<CliOption> = listOf(
+    ENABLE_JAVA_SETTERS,
+  )
+
+  override fun processOption(option: AbstractCliOption, value: String, configuration: CompilerConfiguration) {
+    return when (option) {
+      ENABLE_JAVA_SETTERS -> configuration.put(PiecemealConfiguration.ENABLE_JAVA_SETTERS, value.toBoolean())
+      else -> error("Unexpected config option: '${option.optionName}'")
+    }
+  }
 }

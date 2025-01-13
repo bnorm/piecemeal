@@ -16,9 +16,9 @@
 
 package dev.bnorm.piecemeal.plugin
 
+import com.google.auto.service.AutoService
 import dev.bnorm.piecemeal.plugin.fir.PiecemealFirExtensionRegistrar
 import dev.bnorm.piecemeal.plugin.ir.PiecemealIrGenerationExtension
-import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -29,14 +29,12 @@ import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrarAdapter
 @Suppress("unused") // Used via reflection
 @AutoService(CompilerPluginRegistrar::class)
 class PiecemealComponentRegistrar : CompilerPluginRegistrar() {
-
   override val supportsK2: Boolean
     get() = true
 
-  override fun ExtensionStorage.registerExtensions(
-    configuration: CompilerConfiguration
-  ) {
-    FirExtensionRegistrarAdapter.registerExtension(PiecemealFirExtensionRegistrar())
+  override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
+    val piecemealConfiguration = PiecemealConfiguration.create(configuration)
+    FirExtensionRegistrarAdapter.registerExtension(PiecemealFirExtensionRegistrar(piecemealConfiguration))
     IrGenerationExtension.registerExtension(PiecemealIrGenerationExtension())
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Brian Norman
+ * Copyright (C) 2025 Brian Norman
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
+package dev.bnorm.piecemeal.plugin
 
-class PersonTest {
-  @Test
-  fun testApplyBuilder() {
-    val person = Person.Builder().apply {
-      name = "Sam"
-    }.build()
-    assertEquals(person.toString(), "Person{name=Sam, nickname=Sam, age=0}")
-  }
+import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
-  @Test
-  fun testCompanionBuild() {
-    val person = Person.build {
-      name = "Sam"
+class PiecemealConfiguration(
+  val enableJavaSetters: Boolean = false,
+) {
+  companion object {
+    val ENABLE_JAVA_SETTERS = CompilerConfigurationKey<Boolean>("Enable Java setter generation.")
+
+    fun create(configuration: CompilerConfiguration): PiecemealConfiguration {
+      return PiecemealConfiguration(
+        enableJavaSetters = configuration[ENABLE_JAVA_SETTERS] == true
+      )
     }
-    assertEquals(person.toString(), "Person{name=Sam, nickname=Sam, age=0}")
   }
 }
