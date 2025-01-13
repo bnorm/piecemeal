@@ -17,32 +17,20 @@
 package dev.bnorm.piecemeal.plugin.fir.checkers
 
 import dev.bnorm.piecemeal.plugin.Piecemeal
+import dev.bnorm.piecemeal.plugin.fir.PiecemealErrors.PIECEMEAL_NO_PRIMARY_CONSTRUCTOR
+import dev.bnorm.piecemeal.plugin.fir.PiecemealErrors.PIECEMEAL_PRIVATE_CONSTRUCTOR
+import dev.bnorm.piecemeal.plugin.fir.originalVisibility
 import org.jetbrains.kotlin.descriptors.Visibilities
-import org.jetbrains.kotlin.diagnostics.*
+import org.jetbrains.kotlin.diagnostics.DiagnosticReporter
+import org.jetbrains.kotlin.diagnostics.reportOn
 import org.jetbrains.kotlin.fir.analysis.checkers.MppCheckerKind
 import org.jetbrains.kotlin.fir.analysis.checkers.context.CheckerContext
 import org.jetbrains.kotlin.fir.analysis.checkers.declaration.FirClassChecker
 import org.jetbrains.kotlin.fir.declarations.FirClass
 import org.jetbrains.kotlin.fir.declarations.hasAnnotation
 import org.jetbrains.kotlin.fir.declarations.primaryConstructorIfAny
-import org.jetbrains.kotlin.fir.declarations.utils.visibility
-import org.jetbrains.kotlin.psi.KtNamedDeclaration
-import org.jetbrains.kotlin.psi.KtPrimaryConstructor
 
 object PiecemealAnnotationChecker : FirClassChecker(MppCheckerKind.Common) {
-  private val PIECEMEAL_NO_PRIMARY_CONSTRUCTOR = KtDiagnosticFactory0(
-    "PIECEMEAL_NO_PRIMARY_CONSTRUCTOR",
-    Severity.ERROR,
-    SourceElementPositioningStrategies.DECLARATION_NAME,
-    KtNamedDeclaration::class,
-  )
-
-  private val PIECEMEAL_PRIVATE_CONSTRUCTOR = KtDiagnosticFactory0(
-    "PIECEMEAL_PRIVATE_CONSTRUCTOR",
-    Severity.ERROR,
-    SourceElementPositioningStrategies.VISIBILITY_MODIFIER,
-    KtPrimaryConstructor::class,
-  )
 
   override fun check(declaration: FirClass, context: CheckerContext, reporter: DiagnosticReporter) {
     if (!declaration.hasAnnotation(Piecemeal.ANNOTATION_CLASS_ID, context.session)) return
@@ -53,8 +41,7 @@ object PiecemealAnnotationChecker : FirClassChecker(MppCheckerKind.Common) {
       return
     }
 
-    // Status transformer uses PrivateToThis to distinguish explicitly-private constructors.
-    if (primaryConstructor.visibility == Visibilities.Private) {
+    if (primaryConstructor.originalVisibility == Visibilities.Private) {
       reporter.reportOn(primaryConstructor.source, PIECEMEAL_PRIVATE_CONSTRUCTOR, context)
     }
   }
