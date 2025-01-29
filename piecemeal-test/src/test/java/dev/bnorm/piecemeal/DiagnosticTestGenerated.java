@@ -21,6 +21,12 @@ public class DiagnosticTestGenerated extends AbstractDiagnosticTest {
   }
 
   @Test
+  @TestMetadata("BuilderPropertyTypes.kt")
+  public void testBuilderPropertyTypes() {
+    runTest("piecemeal-test/src/test/data/diagnostic/BuilderPropertyTypes.kt");
+  }
+
+  @Test
   @TestMetadata("BuilderResolved.kt")
   public void testBuilderResolved() {
     runTest("piecemeal-test/src/test/data/diagnostic/BuilderResolved.kt");

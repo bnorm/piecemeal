@@ -21,23 +21,21 @@ import dev.bnorm.piecemeal.plugin.toJavaSetter
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irThrow
+import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.*
+import org.jetbrains.kotlin.ir.builders.declarations.buildField
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrGetValue
+import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
-import org.jetbrains.kotlin.ir.types.IrSimpleType
-import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.types.classOrNull
-import org.jetbrains.kotlin.ir.types.classifierOrNull
-import org.jetbrains.kotlin.ir.util.deepCopyWithoutPatchingParents
-import org.jetbrains.kotlin.ir.util.functions
-import org.jetbrains.kotlin.ir.util.primaryConstructor
+import org.jetbrains.kotlin.ir.types.*
+import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
@@ -59,10 +57,22 @@ class PiecemealBuilderGenerator(
     }
   }
 
+  override fun visitClass(declaration: IrClass) {
+    if (declaration.origin == Piecemeal.ORIGIN) {
+      val declarations = declaration.declarations
+
+      val builderPropertyBackings = declarations
+        .filterIsInstance<IrProperty>()
+        .map { generateBacking(declaration, it) }
+
+      declarations.addAll(0, builderPropertyBackings.flatMap { listOf(it.flag, it.holder) })
+    }
+
+    declaration.acceptChildrenVoid(this)
+  }
+
   override fun visitSimpleFunction(declaration: IrSimpleFunction) {
-    val origin = declaration.origin
-    if (origin is IrDeclarationOrigin.GeneratedByPlugin && origin.pluginKey == Piecemeal.Key) {
-      require(declaration.body == null)
+    if (declaration.origin == Piecemeal.ORIGIN && declaration.body == null) {
       declaration.body = when (declaration.name) {
         Name.identifier("newBuilder") -> generateNewBuilderFunction(declaration)
         Name.identifier("build") -> when {
@@ -76,8 +86,7 @@ class PiecemealBuilderGenerator(
   }
 
   override fun visitConstructor(declaration: IrConstructor) {
-    val origin = declaration.origin
-    if (origin is IrDeclarationOrigin.GeneratedByPlugin && origin.pluginKey == Piecemeal.Key) {
+    if (declaration.origin == Piecemeal.ORIGIN) {
       if (declaration.body == null) {
         declaration.body = generateDefaultConstructor(declaration)
       }
@@ -262,25 +271,93 @@ class PiecemealBuilderGenerator(
     }
 
     for (valueParameter in constructorParameters) {
-      val getter = builderProperties.single { it.name == valueParameter.name }.getter!!
+      val builderProperty = builderProperties.single { it.name == valueParameter.name }.builderPropertyBacking!!
       variables += irTemporary(nameHint = valueParameter.name.asString(), value = irBlock {
-        val value = irTemporary(irCall(getter).apply {
-          dispatchReceiver = irGet(builderParameter)
-        })
-
         val defaultValue = valueParameter.defaultValue
-        val whenNullValue = if (defaultValue != null) {
+        val elsePart = if (defaultValue != null) {
           defaultValue.expression.deepCopyWithoutPatchingParents().transform(transformer, null)
         } else {
           // TODO IllegalStateException
           irThrow(irCall(context.irBuiltIns.illegalArgumentExceptionSymbol).apply {
-            putValueArgument(0, irString("Missing required parameter '${valueParameter.name}'."))
+            putValueArgument(0, irString("Uninitialized builder property '${valueParameter.name}'."))
           })
         }
 
-        +irIfNull(getter.returnType, irGet(value), whenNullValue, irGet(value))
+        +irIfThenElse(
+          type = valueParameter.type,
+          condition = irGetField(irGet(builderParameter), builderProperty.flag),
+          thenPart = irGetField(irGet(builderParameter), builderProperty.holder),
+          elsePart = elsePart
+        )
       })
     }
     return variables
+  }
+
+  private fun generateBacking(
+    klass: IrClass,
+    property: IrProperty,
+  ): BuilderPropertyBacking {
+    val getter = requireNotNull(property.getter)
+    val setter = requireNotNull(property.setter)
+    property.backingField = null
+
+    val isPrimitive = getter.returnType.isPrimitiveType()
+    val backingType = when {
+      isPrimitive -> getter.returnType
+      else -> getter.returnType.makeNullable()
+    }
+
+    val flagField = context.irFactory.buildField {
+      origin = Piecemeal.ORIGIN
+      visibility = DescriptorVisibilities.PRIVATE
+      name = Name.identifier("${property.name}\$PiecemealFlag")
+      type = context.irBuiltIns.booleanType
+    }.apply {
+      parent = klass
+      initializer = context.irFactory.createExpressionBody(
+        expression = false.toIrConst(context.irBuiltIns.booleanType)
+      )
+    }
+
+    val holderField = context.irFactory.buildField {
+      origin = Piecemeal.ORIGIN
+      visibility = DescriptorVisibilities.PRIVATE
+      name = Name.identifier("${property.name}\$PiecemealHolder")
+      type = backingType
+    }.apply {
+      parent = klass
+      initializer = context.irFactory.createExpressionBody(
+        expression = when (isPrimitive) {
+          true -> IrConstImpl.defaultValueForType(SYNTHETIC_OFFSET, SYNTHETIC_OFFSET, backingType)
+          false -> null.toIrConst(backingType)
+        }
+      )
+    }
+
+    getter.origin = Piecemeal.ORIGIN
+    getter.body = DeclarationIrBuilder(context, getter.symbol).irBlockBody {
+      val dispatch = getter.dispatchReceiverParameter!!
+      +irIfThenElse(
+        type = getter.returnType,
+        condition = irGetField(irGet(dispatch), flagField),
+        thenPart = irReturn(irGetField(irGet(dispatch), holderField)),
+        // TODO IllegalStateException
+        elsePart = irThrow(irCall(context.irBuiltIns.illegalArgumentExceptionSymbol).apply {
+          putValueArgument(0, irString("Uninitialized builder property '${property.name}'."))
+        })
+      )
+    }
+
+    setter.origin = Piecemeal.ORIGIN
+    setter.body = DeclarationIrBuilder(context, setter.symbol).irBlockBody {
+      val dispatch = setter.dispatchReceiverParameter!!
+      +irSetField(irGet(dispatch), holderField, irGet(setter.valueParameters[0]))
+      +irSetField(irGet(dispatch), flagField, true.toIrConst(context.irBuiltIns.booleanType))
+    }
+
+    val builderPropertyBacking = BuilderPropertyBacking(holderField, flagField)
+    property.builderPropertyBacking = builderPropertyBacking
+    return builderPropertyBacking
   }
 }

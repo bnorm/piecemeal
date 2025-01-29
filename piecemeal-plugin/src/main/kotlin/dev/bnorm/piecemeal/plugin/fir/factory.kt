@@ -29,7 +29,6 @@ import org.jetbrains.kotlin.fir.plugin.createMemberProperty
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirValueParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.name.*
@@ -135,8 +134,9 @@ fun FirExtension.createPropertyBuilderValue(
     owner = builderClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
-    returnType = parameter.resolvedReturnType.withNullability(nullable = true, session.typeContext),
-    isVal = false
+    returnType = parameter.resolvedReturnType,
+    isVal = false,
+    hasBackingField = false,
   )
 
   return property

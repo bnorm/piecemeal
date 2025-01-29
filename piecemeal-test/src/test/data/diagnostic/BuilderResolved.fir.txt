@@ -25,17 +25,17 @@ FILE: BuilderResolved.kt
         }
 
         public final class Builder : R|kotlin/Any| {
-            public final var name: R|kotlin/String?|
-                public get(): R|kotlin/String?|
-                public set(value: R|kotlin/String?|): R|kotlin/Unit|
+            public final var name: R|kotlin/String|
+                public get(): R|kotlin/String|
+                public set(value: R|kotlin/String|): R|kotlin/Unit|
 
             public final var nickname: R|kotlin/String?|
                 public get(): R|kotlin/String?|
                 public set(value: R|kotlin/String?|): R|kotlin/Unit|
 
-            public final var age: R|kotlin/Int?|
-                public get(): R|kotlin/Int?|
-                public set(value: R|kotlin/Int?|): R|kotlin/Unit|
+            public final var age: R|kotlin/Int|
+                public get(): R|kotlin/Int|
+                public set(value: R|kotlin/Int|): R|kotlin/Unit|
 
             public final fun setName(name: R|kotlin/String|): R|Person.Builder|
 

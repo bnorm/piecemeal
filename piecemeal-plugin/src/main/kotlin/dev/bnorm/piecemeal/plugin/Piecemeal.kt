@@ -18,6 +18,7 @@ package dev.bnorm.piecemeal.plugin
 
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.fir.extensions.predicate.LookupPredicate.BuilderContext.annotated
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin.GeneratedByPlugin
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -28,10 +29,10 @@ object Piecemeal {
   val ANNOTATION_PREDICATE = annotated(ANNOTATION_FQ_NAME)
 
   object Key : GeneratedDeclarationKey() {
-    override fun toString(): String {
-      return "PiecemealKey"
-    }
+    override fun toString(): String = "PiecemealKey"
   }
+
+  val ORIGIN = GeneratedByPlugin(Key)
 }
 
 fun Name.toJavaSetter(): Name {
