@@ -22,6 +22,12 @@ public class BoxTestGenerated extends AbstractBoxTest {
   }
 
   @Test
+  @TestMetadata("BuildException.kt")
+  public void testBuildException() {
+    runTest("piecemeal-test/src/test/data/box/BuildException.kt");
+  }
+
+  @Test
   @TestMetadata("Builder.kt")
   public void testBuilder() {
     runTest("piecemeal-test/src/test/data/box/Builder.kt");
@@ -31,11 +37,5 @@ public class BoxTestGenerated extends AbstractBoxTest {
   @TestMetadata("BuilderWithSetters.kt")
   public void testBuilderWithSetters() {
     runTest("piecemeal-test/src/test/data/box/BuilderWithSetters.kt");
-  }
-
-  @Test
-  @TestMetadata("IrDumpExpected.kt")
-  public void testIrDumpExpected() {
-    runTest("piecemeal-test/src/test/data/box/IrDumpExpected.kt");
   }
 }
