@@ -1,5 +1,12 @@
+@file:OptIn(
+  ExperimentalBuildToolsApi::class,
+  ExperimentalKotlinGradlePluginApi::class,
+)
+
 import com.vanniktech.maven.publish.GradlePlugin
 import com.vanniktech.maven.publish.JavadocJar
+import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
   kotlin("jvm")
@@ -18,6 +25,7 @@ tasks.withType<Test> {
   useJUnitPlatform()
 
   systemProperty("piecemealVersion", project.version)
+  systemProperty("kotlinVersion", kotlin.compilerVersion.get())
   dependsOn(":piecemeal:publishAllPublicationsToTestMavenRepository")
   dependsOn(":piecemeal-plugin:publishAllPublicationsToTestMavenRepository")
   dependsOn(":piecemeal-gradle:publishAllPublicationsToTestMavenRepository")

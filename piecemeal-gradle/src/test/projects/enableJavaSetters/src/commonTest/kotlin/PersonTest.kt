@@ -19,6 +19,14 @@ import kotlin.test.assertEquals
 
 class PersonTest {
   @Test
+  fun testFluentBuilder() {
+    val person = Person.Builder()
+      .setName("Sam")
+      .build()
+    assertEquals(person.toString(), "Person{name=Sam, nickname=Sam, age=0}")
+  }
+
+  @Test
   fun testApplyBuilder() {
     val person = Person.Builder().apply {
       name = "Sam"

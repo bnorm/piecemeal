@@ -137,9 +137,14 @@ class PiecemealFirGenerationExtension(
         val builderClassId = classSymbol.classId.outerClassId!!
         val piecemealClass = session.findClassSymbol(builderClassId)!!
         val parameters = getPrimaryConstructorValueParameters(piecemealClass)
-        (parameters.map { it.name } +
-          parameters.map { it.name.toJavaSetter() } +
-          setOf(SpecialNames.INIT, BUILD_FUN_NAME)).toSet()
+        buildSet {
+          add(SpecialNames.INIT)
+          addAll(parameters.map { it.name })
+          if (session.piecemeal.configuration.enableJavaSetters) {
+            addAll(parameters.map { it.name.toJavaSetter() })
+          }
+          add(BUILD_FUN_NAME)
+        }
       }
 
       else -> emptySet()

@@ -1,4 +1,5 @@
 // FIR_DUMP
+// ENABLE_JAVA_SETTERS
 
 import dev.bnorm.piecemeal.Piecemeal
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Brian Norman
+ * Copyright (C) 2024 Brian Norman
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package dev.bnorm.piecemeal
+import dev.bnorm.piecemeal.Piecemeal
 
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
-
-open class PiecemealGradleExtension(objectFactory: ObjectFactory) {
-  /**
-   * Classes annotated with `@Piecemeal` will have Java-style setters added to
-   * their builder class.
-   */
-  val enableJavaSetters: Property<Boolean> =
-    objectFactory.property(Boolean::class.java)
-      .convention(false)
+@Piecemeal
+class Person(
+  val name: String,
+  val nickname: String? = name,
+  val age: Int = 0,
+) {
+  override fun toString(): String {
+    return "Person{name=$name, nickname=$nickname, age=$age}"
+  }
 }

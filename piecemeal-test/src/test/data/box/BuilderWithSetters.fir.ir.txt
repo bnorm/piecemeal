@@ -1,4 +1,4 @@
-FILE fqName:<root> fileName:/IrDumpActual.kt
+FILE fqName:<root> fileName:/BuilderWithSetters.kt
   CLASS CLASS name:Person modality:FINAL visibility:public superTypes:[kotlin.Any]
     annotations:
       Piecemeal

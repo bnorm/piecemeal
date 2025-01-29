@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Brian Norman
+ * Copyright (C) 2025 Brian Norman
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,8 @@
 
 package dev.bnorm.piecemeal
 
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
+import org.jetbrains.kotlin.test.directives.model.SimpleDirectivesContainer
 
-open class PiecemealGradleExtension(objectFactory: ObjectFactory) {
-  /**
-   * Classes annotated with `@Piecemeal` will have Java-style setters added to
-   * their builder class.
-   */
-  val enableJavaSetters: Property<Boolean> =
-    objectFactory.property(Boolean::class.java)
-      .convention(false)
+object PiecemealDirectives : SimpleDirectivesContainer() {
+  val ENABLE_JAVA_SETTERS by directive("Enable Java setters.")
 }
