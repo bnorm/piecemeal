@@ -16,7 +16,7 @@ FILE: BuilderResolved.kt
         public final fun newBuilder(): R|Person.Builder|
 
         public final companion object Companion : R|kotlin/Any| {
-            public final fun build(builder: R|Person.Builder.() -> kotlin/Unit|): R|Person|
+            public final inline fun build(builder: R|Person.Builder.() -> kotlin/Unit|): R|Person|
 
             private constructor(): R|Person.Companion| {
                 super<R|kotlin/Any|>()
@@ -60,7 +60,7 @@ FILE: BuilderResolved.kt
         ).R|/Person.Builder.build|()
     }
     public final fun person3(): R|Person| {
-        ^person3 Q|Person|.R|/Person.Companion.build|(<L> = build@fun R|Person.Builder|.<anonymous>(): R|kotlin/Unit| <inline=NoInline>  {
+        ^person3 Q|Person|.R|/Person.Companion.build|(<L> = build@fun R|Person.Builder|.<anonymous>(): R|kotlin/Unit| <inline=Inline, kind=UNKNOWN>  {
             this@R|special/anonymous|.R|/Person.Builder.name| = String(John)
         }
         )

@@ -157,6 +157,9 @@ fun FirExtension.createFunPiecemealDsl(
     name = callableId.callableName,
     returnType = piecemealClassSymbol.constructStarProjectedType(),
   ) {
+    status {
+      isInline = true
+    }
     valueParameter(Name.identifier("builder"), builderType)
   }
 }
