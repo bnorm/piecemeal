@@ -16,6 +16,7 @@
 
 package dev.bnorm.piecemeal
 
+import dev.bnorm.piecemeal.BuildConfig.SUPPORT_LIBRARY_COORDINATES
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME
 import org.gradle.api.provider.Provider
@@ -36,14 +37,14 @@ class PiecemealGradlePlugin : KotlinCompilerPluginSupportPlugin {
         val kotlin = target.extensions.getByName("kotlin") as KotlinSourceSetContainer
         kotlin.sourceSets.getByName(COMMON_MAIN_SOURCE_SET_NAME) { sourceSet ->
           sourceSet.dependencies {
-            implementation(BuildConfig.annotationsDependency)
+            implementation(SUPPORT_LIBRARY_COORDINATES)
           }
         }
       } else {
         if (target.plugins.hasPlugin("org.gradle.java-test-fixtures")) {
-          target.dependencies.add("testFixturesImplementation", BuildConfig.annotationsDependency)
+          target.dependencies.add("testFixturesImplementation", SUPPORT_LIBRARY_COORDINATES)
         }
-        target.dependencies.add(IMPLEMENTATION_CONFIGURATION_NAME, BuildConfig.annotationsDependency)
+        target.dependencies.add(IMPLEMENTATION_CONFIGURATION_NAME, SUPPORT_LIBRARY_COORDINATES)
       }
     }
   }
@@ -73,7 +74,4 @@ class PiecemealGradlePlugin : KotlinCompilerPluginSupportPlugin {
       )
     }
   }
-
-  private val BuildConfig.annotationsDependency: String
-    get() = "$SUPPORT_LIBRARY_GROUP:$SUPPORT_LIBRARY_NAME:$SUPPORT_LIBRARY_VERSION"
 }

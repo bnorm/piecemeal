@@ -16,6 +16,8 @@
 
 package dev.bnorm.piecemeal
 
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.BuildTask
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import java.nio.file.Path
@@ -28,18 +30,38 @@ import kotlin.test.assertEquals
 class PiecemealGradlePluginTest {
   @Test
   fun testEnableJavaSetters() = forProject("enableJavaSetters") { projectDir ->
-    val taskName = ":check"
-    val result = runBuild(projectDir, taskName).build()
-    val task = result.task(taskName)!!
-    assertEquals(task.outcome, TaskOutcome.SUCCESS)
+    val taskNames = listOf(":build", ":check")
+    val result = runBuild(projectDir, taskNames).build()
+    result.forEachTask(taskNames) { task ->
+      assertEquals(task.outcome, TaskOutcome.SUCCESS)
+    }
   }
 
   @Test
   fun testMultiplatform() = forProject("multiplatform") { projectDir ->
-    val taskName = ":check"
-    val result = runBuild(projectDir, taskName).build()
-    val task = result.task(taskName)!!
-    assertEquals(task.outcome, TaskOutcome.SUCCESS)
+    val taskNames = listOf(":build", ":check")
+    val result = runBuild(projectDir, taskNames).build()
+    result.forEachTask(taskNames) { task ->
+      assertEquals(task.outcome, TaskOutcome.SUCCESS)
+    }
+  }
+
+  @Test
+  fun testJvm() = forProject("jvm") { projectDir ->
+    val taskNames = listOf(":build", ":check")
+    val result = runBuild(projectDir, taskNames).build()
+    result.forEachTask(taskNames) { task ->
+      assertEquals(task.outcome, TaskOutcome.SUCCESS)
+    }
+  }
+
+  @Test
+  fun testJavaTestFixtures() = forProject("java-test-fixtures") { projectDir ->
+    val taskNames = listOf(":build", ":check")
+    val result = runBuild(projectDir, taskNames).build()
+    result.forEachTask(taskNames) { task ->
+      assertEquals(task.outcome, TaskOutcome.SUCCESS)
+    }
   }
 
   @OptIn(ExperimentalPathApi::class)
@@ -60,13 +82,20 @@ class PiecemealGradlePluginTest {
 
   private fun runBuild(
     projectDir: Path,
-    vararg taskNames: String,
+    taskNames: List<String>,
   ): GradleRunner {
     val arguments = arrayOf("--info", "--stacktrace", "--continue")
     return GradleRunner.create()
       .withProjectDir(projectDir.toFile())
       .forwardOutput()
-      .withArguments(*arguments, *taskNames, versionProperty, kotlinProperty)
+      .withArguments(*arguments, *taskNames.toTypedArray(), versionProperty, kotlinProperty)
+  }
+
+  private fun BuildResult.forEachTask(taskNames: List<String>, block: (BuildTask) -> Unit) {
+    for (taskName in taskNames) {
+      val task = task(taskName)!!
+      block.invoke(task)
+    }
   }
 
   companion object {

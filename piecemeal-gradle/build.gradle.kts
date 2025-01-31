@@ -41,9 +41,8 @@ buildConfig {
   buildConfigField("String", "KOTLIN_PLUGIN_VERSION", "\"${pluginProject.version}\"")
 
   val libraryProject = project(":piecemeal")
-  buildConfigField("String", "SUPPORT_LIBRARY_GROUP", "\"${libraryProject.group}\"")
-  buildConfigField("String", "SUPPORT_LIBRARY_NAME", "\"${libraryProject.name}\"")
-  buildConfigField("String", "SUPPORT_LIBRARY_VERSION", "\"${libraryProject.version}\"")
+  val libraryCoordinates = "${libraryProject.group}:${libraryProject.name}:${libraryProject.version}"
+  buildConfigField("String", "SUPPORT_LIBRARY_COORDINATES", "\"$libraryCoordinates\"")
 }
 
 gradlePlugin {
