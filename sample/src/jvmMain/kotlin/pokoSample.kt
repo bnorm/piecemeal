@@ -19,7 +19,7 @@ fun main() {
     name = "Chicago"
     type = Place.Type.City
   }
-  val chicago2 = Place.Builder()
+  val chicago2 = Place.Mutable()
     .setName("Chicago")
     .setType(Place.Type.City)
     .build()

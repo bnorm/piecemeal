@@ -50,14 +50,14 @@ class PiecemealFirGenerationExtension(
     piecemealClasses.map { it.classId }.toSet()
   }
 
-  // IDs for nested Builder classes.
+  // IDs for Piecemeal-annotated classes' companion objects.
   private val piecemealCompanionClassIds by lazy {
     piecemealClasses.map { it.classId.companion }.toSet()
   }
 
-  // IDs for nested Builder classes.
-  private val builderClassIds by lazy {
-    piecemealClasses.map { it.classId.builder }.toSet()
+  // IDs for nested Mutable classes.
+  private val mutableClassIds by lazy {
+    piecemealClasses.map { it.classId.mutable }.toSet()
   }
 
   override fun FirDeclarationPredicateRegistrar.registerPredicates() {
@@ -73,8 +73,8 @@ class PiecemealFirGenerationExtension(
     val function = when {
 
       callableId.classId in piecemealClassIds -> when (callableId.callableName) {
-        NEW_BUILDER_FUN_NAME ->
-          createFunNewBuilder(
+        TO_MUTABLE_FUN_NAME ->
+          createFunToMutable(
             piecemealClassSymbol = owner,
             callableId = callableId,
           )
@@ -94,15 +94,15 @@ class PiecemealFirGenerationExtension(
           callableId = callableId,
         )
 
-      callableId.classId in builderClassIds ->
+      callableId.classId in mutableClassIds ->
         when (callableId.callableName) {
-          BUILD_FUN_NAME -> createFunBuilderBuild(
-            builderClassSymbol = owner,
+          BUILD_FUN_NAME -> createFunMutableBuild(
+            mutableClassSymbol = owner,
             callableId = callableId,
           )
 
-          else -> createFunBuilderSetter(
-            builderClassSymbol = owner,
+          else -> createFunMutableSetter(
+            mutableClassSymbol = owner,
             callableId = callableId,
           )
         }
@@ -117,8 +117,8 @@ class PiecemealFirGenerationExtension(
   override fun generateProperties(callableId: CallableId, context: MemberGenerationContext?): List<FirPropertySymbol> {
     val owner = context?.owner ?: return emptyList()
 
-    if (callableId.classId in builderClassIds) {
-      val property = createPropertyBuilderValue(owner, callableId) ?: return emptyList()
+    if (callableId.classId in mutableClassIds) {
+      val property = createPropertyMutableValue(owner, callableId) ?: return emptyList()
       return listOf(property.symbol)
     }
 
@@ -128,7 +128,7 @@ class PiecemealFirGenerationExtension(
   override fun generateConstructors(context: MemberGenerationContext): List<FirConstructorSymbol> {
     val ownerClassId = context.owner.classId
     val constructor = when {
-      ownerClassId in builderClassIds ->
+      ownerClassId in mutableClassIds ->
         createConstructor(context.owner, Piecemeal.Key, isPrimary = true)
 
       ownerClassId in piecemealCompanionClassIds ->
@@ -141,11 +141,11 @@ class PiecemealFirGenerationExtension(
 
   override fun getCallableNamesForClass(classSymbol: FirClassSymbol<*>, context: MemberGenerationContext): Set<Name> {
     return when {
-      classSymbol in piecemealClasses -> setOf(NEW_BUILDER_FUN_NAME, COPY_FUN_NAME)
+      classSymbol in piecemealClasses -> setOf(TO_MUTABLE_FUN_NAME, COPY_FUN_NAME)
       classSymbol.classId in piecemealCompanionClassIds -> setOf(BUILD_FUN_NAME, SpecialNames.INIT)
-      classSymbol.classId in builderClassIds -> {
-        val builderClassId = classSymbol.classId.outerClassId!!
-        val piecemealClass = session.findClassSymbol(builderClassId)!!
+      classSymbol.classId in mutableClassIds -> {
+        val piecemealClassId = classSymbol.classId.outerClassId!!
+        val piecemealClass = session.findClassSymbol(piecemealClassId)!!
         val parameters = getPrimaryConstructorValueParameters(piecemealClass)
         buildSet {
           add(SpecialNames.INIT)
@@ -166,7 +166,7 @@ class PiecemealFirGenerationExtension(
     context: NestedClassGenerationContext,
   ): Set<Name> {
     return when (classSymbol) {
-      in piecemealClasses -> setOf(BUILDER_CLASS_NAME, SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT)
+      in piecemealClasses -> setOf(MUTABLE_CLASS_NAME, SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT)
       else -> emptySet()
     }
   }
@@ -179,7 +179,7 @@ class PiecemealFirGenerationExtension(
     if (owner !is FirRegularClassSymbol) return null
     if (owner !in piecemealClasses) return null
     return when (name) {
-      BUILDER_CLASS_NAME -> createNestedClass(owner, name, Piecemeal.Key).symbol
+      MUTABLE_CLASS_NAME -> createNestedClass(owner, name, Piecemeal.Key).symbol
       SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT -> generateCompanionDeclaration(owner)
       else -> error("Can't generate class ${owner.classId.createNestedClassId(name).asSingleFqName()}")
     }

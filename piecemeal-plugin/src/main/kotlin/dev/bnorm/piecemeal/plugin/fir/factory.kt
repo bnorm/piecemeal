@@ -26,29 +26,26 @@ import org.jetbrains.kotlin.fir.contracts.builder.buildResolvedContractDescripti
 import org.jetbrains.kotlin.fir.contracts.description.ConeCallsEffectDeclaration
 import org.jetbrains.kotlin.fir.declarations.FirProperty
 import org.jetbrains.kotlin.fir.declarations.FirSimpleFunction
-import org.jetbrains.kotlin.fir.extensions.ExperimentalTopLevelDeclarationsGenerationApi
 import org.jetbrains.kotlin.fir.extensions.FirExtension
 import org.jetbrains.kotlin.fir.plugin.createConeType
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
-import org.jetbrains.kotlin.fir.resolve.defaultType
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirValueParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
-import org.jetbrains.kotlin.metadata.ProtoBuf.Effect.InvocationKind.EXACTLY_ONCE
 import org.jetbrains.kotlin.name.*
 
-val BUILDER_CLASS_NAME = Name.identifier("Builder")
+val MUTABLE_CLASS_NAME = Name.identifier("Mutable")
 
-val NEW_BUILDER_FUN_NAME = Name.identifier("newBuilder")
+val TO_MUTABLE_FUN_NAME = Name.identifier("toMutable")
 val BUILD_FUN_NAME = Name.identifier("build")
 val COPY_FUN_NAME = Name.identifier("copy")
 
 val FUNCTION1 = ClassId(FqName("kotlin"), Name.identifier("Function1"))
 
-val ClassId.builder: ClassId get() = createNestedClassId(BUILDER_CLASS_NAME)
+val ClassId.mutable: ClassId get() = createNestedClassId(MUTABLE_CLASS_NAME)
 val ClassId.companion: ClassId get() = createNestedClassId(SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT)
 
 fun Name.toParameterName(): Name {
@@ -83,17 +80,17 @@ fun getPrimaryConstructorValueParameters(
   return outerPrimaryConstructor.valueParameterSymbols
 }
 
-fun FirExtension.createFunNewBuilder(
+fun FirExtension.createFunToMutable(
   piecemealClassSymbol: FirClassSymbol<*>,
   callableId: CallableId,
 ): FirSimpleFunction? {
   val piecemealClassId = callableId.classId ?: return null
-  val builderClassSymbol = session.findClassSymbol(piecemealClassId.builder) ?: return null
+  val mutableClassSymbol = session.findClassSymbol(piecemealClassId.mutable) ?: return null
   return createMemberFunction(
     owner = piecemealClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
-    returnType = builderClassSymbol.constructStarProjectedType(),
+    returnType = mutableClassSymbol.constructStarProjectedType(),
   )
 }
 
@@ -102,7 +99,7 @@ fun FirExtension.createFunCopy(
   callableId: CallableId,
 ): FirSimpleFunction? {
   val piecemealClassId = piecemealClassSymbol.classId
-  val builderClassSymbol = session.findClassSymbol(piecemealClassId.builder) ?: return null
+  val mutableClassSymbol = session.findClassSymbol(piecemealClassId.mutable) ?: return null
   val parameterName = "transform"
   return createMemberFunction(
     owner = piecemealClassSymbol,
@@ -115,7 +112,7 @@ fun FirExtension.createFunCopy(
     }
     valueParameter(
       name = Name.identifier(parameterName),
-      type = fun1Ext(session, receiver = builderClassSymbol),
+      type = fun1Ext(session, receiver = mutableClassSymbol),
     )
   }.apply {
     replaceContractDescription(
@@ -131,49 +128,49 @@ fun FirExtension.createFunCopy(
   }
 }
 
-fun FirExtension.createFunBuilderBuild(
-  builderClassSymbol: FirClassSymbol<*>,
+fun FirExtension.createFunMutableBuild(
+  mutableClassSymbol: FirClassSymbol<*>,
   callableId: CallableId,
 ): FirSimpleFunction? {
-  val piecemealClassId = builderClassSymbol.classId.outerClassId!!
+  val piecemealClassId = mutableClassSymbol.classId.outerClassId!!
   val piecemealClassSymbol = session.findClassSymbol(piecemealClassId)!!
   return createMemberFunction(
-    owner = builderClassSymbol,
+    owner = mutableClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
     returnType = piecemealClassSymbol.constructStarProjectedType(),
   )
 }
 
-fun FirExtension.createFunBuilderSetter(
-  builderClassSymbol: FirClassSymbol<*>,
+fun FirExtension.createFunMutableSetter(
+  mutableClassSymbol: FirClassSymbol<*>,
   callableId: CallableId,
 ): FirSimpleFunction? {
-  val piecemealClassId = builderClassSymbol.classId.outerClassId!!
+  val piecemealClassId = mutableClassSymbol.classId.outerClassId!!
   val piecemealClassSymbol = session.findClassSymbol(piecemealClassId)!!
   val parameterSymbol = getPrimaryConstructorValueParameters(piecemealClassSymbol)
     .singleOrNull { it.name.toJavaSetter() == callableId.callableName } ?: return null
   return createMemberFunction(
-    owner = builderClassSymbol,
+    owner = mutableClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
-    returnType = builderClassSymbol.constructStarProjectedType(),
+    returnType = mutableClassSymbol.constructStarProjectedType(),
   ) {
     valueParameter(callableId.callableName.toParameterName(), parameterSymbol.resolvedReturnType)
   }
 }
 
-fun FirExtension.createPropertyBuilderValue(
-  builderClassSymbol: FirClassSymbol<*>,
+fun FirExtension.createPropertyMutableValue(
+  mutableClassSymbol: FirClassSymbol<*>,
   callableId: CallableId
 ): FirProperty? {
-  val piecemealClassId = builderClassSymbol.classId.outerClassId!!
+  val piecemealClassId = mutableClassSymbol.classId.outerClassId!!
   val piecemealClassSymbol = session.findClassSymbol(piecemealClassId)!!
 
   val parameter = getPrimaryConstructorValueParameters(piecemealClassSymbol)
     .singleOrNull { it.name == callableId.callableName } ?: return null
   val property = createMemberProperty(
-    owner = builderClassSymbol,
+    owner = mutableClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
     returnType = parameter.resolvedReturnType,
@@ -184,15 +181,15 @@ fun FirExtension.createPropertyBuilderValue(
   return property
 }
 
-@OptIn(ExperimentalTopLevelDeclarationsGenerationApi::class)
 fun FirExtension.createFunPiecemealDsl(
   companionClassSymbol: FirClassSymbol<*>,
   callableId: CallableId,
 ): FirSimpleFunction? {
   val piecemealClassId = companionClassSymbol.classId.outerClassId!!
   val piecemealClassSymbol = session.findClassSymbol(piecemealClassId)!!
-  val builderClassSymbol = session.findClassSymbol(piecemealClassId.builder) ?: return null
-  val builderType = fun1Ext(session, receiver = builderClassSymbol)
+  val mutableClassSymbol = session.findClassSymbol(piecemealClassId.mutable) ?: return null
+  val builderType = fun1Ext(session, receiver = mutableClassSymbol)
+  val paramName = "builder"
   return createMemberFunction(
     owner = companionClassSymbol,
     key = Piecemeal.Key,
@@ -202,11 +199,11 @@ fun FirExtension.createFunPiecemealDsl(
     status {
       isInline = true
     }
-    valueParameter(Name.identifier("builder"), builderType)
+    valueParameter(Name.identifier(paramName), builderType)
   }.apply {
     replaceContractDescription(buildResolvedContractDescription {
       effects += buildEffectDeclaration {
-        effect = ConeCallsEffectDeclaration(KtValueParameterReference(0, "builder"), EventOccurrencesRange.EXACTLY_ONCE)
+        effect = ConeCallsEffectDeclaration(KtValueParameterReference(0, paramName), EventOccurrencesRange.EXACTLY_ONCE)
       }
     })
   }

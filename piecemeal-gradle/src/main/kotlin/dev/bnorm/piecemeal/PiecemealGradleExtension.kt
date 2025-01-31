@@ -22,7 +22,7 @@ import org.gradle.api.provider.Property
 open class PiecemealGradleExtension(objectFactory: ObjectFactory) {
   /**
    * Classes annotated with `@Piecemeal` will have Java-style setters added to
-   * their builder class.
+   * their Mutable class.
    */
   val enableJavaSetters: Property<Boolean> =
     objectFactory.property(Boolean::class.java)

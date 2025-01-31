@@ -19,16 +19,16 @@ import kotlin.test.assertEquals
 
 class PersonTest {
   @Test
-  fun testFluentBuilder() {
-    val person = Person.Builder()
+  fun testFluentMutable() {
+    val person = Person.Mutable()
       .setName("Sam")
       .build()
     assertEquals(person.toString(), "Person{name=Sam, nickname=Sam, age=0}")
   }
 
   @Test
-  fun testApplyBuilder() {
-    val person = Person.Builder().apply {
+  fun testApplyMutable() {
+    val person = Person.Mutable().apply {
       name = "Sam"
     }.build()
     assertEquals(person.toString(), "Person{name=Sam, nickname=Sam, age=0}")

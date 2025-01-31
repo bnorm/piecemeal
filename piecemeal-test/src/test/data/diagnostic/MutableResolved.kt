@@ -11,13 +11,13 @@ class Person(
 )
 
 fun person1(): Person {
-  return Person.Builder()
+  return Person.Mutable()
     .setName("John")
     .build()
 }
 
 fun person2(): Person {
-  return Person.Builder().apply {
+  return Person.Mutable().apply {
     name = "John"
   }.build()
 }

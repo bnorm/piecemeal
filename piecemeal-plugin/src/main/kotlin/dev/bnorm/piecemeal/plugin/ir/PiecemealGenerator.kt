@@ -19,7 +19,7 @@ package dev.bnorm.piecemeal.plugin.ir
 import dev.bnorm.piecemeal.plugin.Piecemeal
 import dev.bnorm.piecemeal.plugin.fir.BUILD_FUN_NAME
 import dev.bnorm.piecemeal.plugin.fir.COPY_FUN_NAME
-import dev.bnorm.piecemeal.plugin.fir.NEW_BUILDER_FUN_NAME
+import dev.bnorm.piecemeal.plugin.fir.TO_MUTABLE_FUN_NAME
 import dev.bnorm.piecemeal.plugin.toJavaSetter
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -48,7 +48,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 @OptIn(UnsafeDuringIrConstructionAPI::class)
-class PiecemealBuilderGenerator(
+class PiecemealGenerator(
   private val context: IrPluginContext,
 ) : IrElementVisitorVoid {
   private val nullableStringType = context.irBuiltIns.stringType.makeNullable()
@@ -74,11 +74,11 @@ class PiecemealBuilderGenerator(
     if (declaration.origin == Piecemeal.ORIGIN) {
       val declarations = declaration.declarations
 
-      val builderPropertyBackings = declarations
+      val mutablePropertyBackings = declarations
         .filterIsInstance<IrProperty>()
         .map { generateBacking(declaration, it) }
 
-      declarations.addAll(0, builderPropertyBackings.flatMap { listOf(it.flag, it.holder) })
+      declarations.addAll(0, mutablePropertyBackings.flatMap { listOf(it.flag, it.holder) })
     }
 
     declaration.acceptChildrenVoid(this)
@@ -87,15 +87,15 @@ class PiecemealBuilderGenerator(
   override fun visitSimpleFunction(declaration: IrSimpleFunction) {
     if (declaration.origin == Piecemeal.ORIGIN && declaration.body == null) {
       declaration.body = when (declaration.name) {
-        Name.identifier("newBuilder") -> generateNewBuilderFunction(declaration)
-        Name.identifier("build") -> when {
+        TO_MUTABLE_FUN_NAME -> generateToMutableFunction(declaration)
+        BUILD_FUN_NAME -> when {
           (declaration.parent as? IrClass)?.isCompanion == true -> generateBuilderFunction(declaration)
           else -> generateBuildFunction(declaration)
         }
 
         COPY_FUN_NAME -> generateCopyFunction(declaration)
 
-        else -> generateBuilderSetter(declaration)
+        else -> generateMutableSetter(declaration)
       }
     }
   }
@@ -110,31 +110,31 @@ class PiecemealBuilderGenerator(
 
   /**
    * ```kotlin
-   * fun newBuilder(): Builder {
-   *     val builder = Builder()
-   *     builder.name = name
-   *     builder.nickname = nickname
-   *     builder.age = age
-   *     return builder
+   * fun toMutable(): Mutable {
+   *     val mutable = Mutable()
+   *     mutable.name = name
+   *     mutable.nickname = nickname
+   *     mutable.age = age
+   *     return mutable
    * }
    * ```
    */
-  private fun generateNewBuilderFunction(function: IrSimpleFunction): IrBody? {
+  private fun generateToMutableFunction(function: IrSimpleFunction): IrBody? {
     val receiver = function.dispatchReceiverParameter ?: return null
     val piecemealClass = function.parent as? IrClass ?: return null
-    val builderClass = function.returnType.classifierOrNull?.owner as? IrClass ?: return null
-    val builderConstructor = builderClass.primaryConstructor ?: return null
+    val mutableClass = function.returnType.classifierOrNull?.owner as? IrClass ?: return null
+    val mutableConstructor = mutableClass.primaryConstructor ?: return null
 
     val properties = piecemealClass.declarations.filterIsInstance<IrProperty>()
       .associateBy { it.name }
 
     val irBuilder = DeclarationIrBuilder(context, function.symbol)
     return irBuilder.irBlockBody {
-      val tmp = irTemporary(nameHint = "builder", value = irCall(builderConstructor))
+      val tmp = irTemporary(nameHint = "mutable", value = irCall(mutableConstructor))
 
-      for (builderProperty in builderClass.declarations.filterIsInstance<IrProperty>()) {
-        val piecemealProperty = properties[builderProperty.name] ?: continue
-        +irCall(builderProperty.setter!!).apply {
+      for (mutableProperty in mutableClass.declarations.filterIsInstance<IrProperty>()) {
+        val piecemealProperty = properties[mutableProperty.name] ?: continue
+        +irCall(mutableProperty.setter!!).apply {
           dispatchReceiver = irGet(tmp)
           putValueArgument(0, irCall(piecemealProperty.getter!!).apply {
             dispatchReceiver = irGet(receiver)
@@ -148,16 +148,16 @@ class PiecemealBuilderGenerator(
 
   /**
    * ```kotlin
-   * fun setName(name: String?): Builder {
+   * fun setName(name: String?): Mutable {
    *     this.name = name
    *     return this
    * }
    * ```
    */
-  private fun generateBuilderSetter(function: IrSimpleFunction): IrBody? {
+  private fun generateMutableSetter(function: IrSimpleFunction): IrBody? {
     val receiver = function.dispatchReceiverParameter ?: return null
-    val builderClass = function.parent as? IrClass ?: return null
-    val property = builderClass.declarations.filterIsInstance<IrProperty>()
+    val mutableClass = function.parent as? IrClass ?: return null
+    val property = mutableClass.declarations.filterIsInstance<IrProperty>()
       .single { it.name.toJavaSetter() == function.name }
 
     val irBuilder = DeclarationIrBuilder(context, function.symbol)
@@ -188,15 +188,15 @@ class PiecemealBuilderGenerator(
    * ```
    */
   private fun generateBuildFunction(function: IrSimpleFunction): IrBody? {
-    val builderClass = function.parent as? IrClass ?: return null
+    val mutableClass = function.parent as? IrClass ?: return null
     val piecemealClass = function.returnType.classifierOrNull?.owner as? IrClass ?: return null
     val piecemealConstructor = piecemealClass.primaryConstructor ?: return null
 
     val irBuilder = DeclarationIrBuilder(context, function.symbol)
     return irBuilder.irBlockBody {
-      val variables = irBuilderParameters(
-        builderProperties = builderClass.declarations.filterIsInstance<IrProperty>(),
-        builderParameter = function.dispatchReceiverParameter!!,
+      val variables = irMutableConstructorParameters(
+        mutableProperties = mutableClass.declarations.filterIsInstance<IrProperty>(),
+        buildFunctionReceiverParameter = function.dispatchReceiverParameter!!,
         constructorParameters = piecemealConstructor.valueParameters
       )
 
@@ -212,8 +212,8 @@ class PiecemealBuilderGenerator(
 
   /**
    * ```kotlin
-   * fun copy(transform: Person.Builder.() -> Unit): Person {
-   *     val tmp = newBuilder()
+   * fun copy(transform: Person.Mutable.() -> Unit): Person {
+   *     val tmp = toMutable()
    *     tmp.transform()
    *     return tmp.build()
    * }
@@ -221,12 +221,12 @@ class PiecemealBuilderGenerator(
    */
   private fun generateCopyFunction(function: IrSimpleFunction): IrBody? {
     val transformLambda = function.valueParameters.single()
-    val builderType = (transformLambda.type as IrSimpleType).arguments[0] as IrType
-    val builderClass = builderType.classifierOrNull?.owner as? IrClass ?: return null
+    val mutableType = (transformLambda.type as IrSimpleType).arguments[0] as IrType
+    val mutableClass = mutableType.classifierOrNull?.owner as? IrClass ?: return null
 
     val piecemealClass = function.parentAsClass
-    val newBuilderFunction = piecemealClass.functions.single {
-      it.name == NEW_BUILDER_FUN_NAME &&
+    val toMutableFunction = piecemealClass.functions.single {
+      it.name == TO_MUTABLE_FUN_NAME &&
         it.extensionReceiverParameter == null &&
         it.valueParameters.isEmpty()
     }
@@ -240,7 +240,7 @@ class PiecemealBuilderGenerator(
           owner.valueParameters.single().type.classifierOrNull is IrTypeParameterSymbol
       }
 
-    val build = builderClass.functions
+    val build = mutableClass.functions
       .single {
         it.name == BUILD_FUN_NAME &&
           it.extensionReceiverParameter == null &&
@@ -250,7 +250,7 @@ class PiecemealBuilderGenerator(
     val irBuilder = DeclarationIrBuilder(context, function.symbol)
     return irBuilder.irBlockBody {
       val tmp = irTemporary(
-        value = irCall(newBuilderFunction).apply {
+        value = irCall(toMutableFunction).apply {
           dispatchReceiver = irGet(function.dispatchReceiverParameter!!)
         },
       )
@@ -289,9 +289,9 @@ class PiecemealBuilderGenerator(
 
   /**
    * ```kotlin
-   * fun build(builder: Person.Builder.() -> Unit): Person {
-   *     val tmp = Builder()
-   *     tmp.builder()
+   * fun build(builder: Person.Mutable.() -> Unit): Person {
+   *     val tmp = Mutable()
+   *     tmp.build()
    *     return tmp
    * }
    * ```
@@ -299,20 +299,20 @@ class PiecemealBuilderGenerator(
   private fun generateBuilderFunction(function: IrSimpleFunction): IrBody? {
     val builderLambda = function.valueParameters.single()
     val builderType = (builderLambda.type as IrSimpleType).arguments[0] as IrType
-    val builderClass = builderType.classifierOrNull?.owner as? IrClass ?: return null
-    val builderConstructor = builderClass.primaryConstructor ?: return null
+    val mutableClass = builderType.classifierOrNull?.owner as? IrClass ?: return null
+    val mutableConstructor = mutableClass.primaryConstructor ?: return null
 
     val invoke = builderLambda.type.classOrNull!!.functions
       .filter { !it.owner.isFakeOverride } // TODO best way to find single access method?
       .single()
 
-    val build = builderClass.functions
+    val build = mutableClass.functions
       .filter { it.name.asString() == "build" } // TODO best way to find build method?
       .single()
 
     val irBuilder = DeclarationIrBuilder(context, function.symbol)
     return irBuilder.irBlockBody {
-      val tmp = irTemporary(value = irCall(builderConstructor))
+      val tmp = irTemporary(value = irCall(mutableConstructor))
 
       +irCall(invoke).apply {
         dispatchReceiver = irGet(builderLambda)
@@ -325,9 +325,9 @@ class PiecemealBuilderGenerator(
     }
   }
 
-  private fun IrBlockBodyBuilder.irBuilderParameters(
-    builderProperties: List<IrProperty>,
-    builderParameter: IrValueParameter,
+  private fun IrBlockBodyBuilder.irMutableConstructorParameters(
+    mutableProperties: List<IrProperty>,
+    buildFunctionReceiverParameter: IrValueParameter,
     constructorParameters: List<IrValueParameter>
   ): MutableList<IrVariable> {
     val variables = mutableListOf<IrVariable>()
@@ -342,21 +342,21 @@ class PiecemealBuilderGenerator(
     }
 
     for (valueParameter in constructorParameters) {
-      val builderProperty = builderProperties.single { it.name == valueParameter.name }.builderPropertyBacking!!
+      val mutableProperty = mutableProperties.single { it.name == valueParameter.name }.mutablePropertyBacking!!
       variables += irTemporary(nameHint = valueParameter.name.asString(), value = irBlock {
         val defaultValue = valueParameter.defaultValue
         val elsePart = if (defaultValue != null) {
           defaultValue.expression.deepCopyWithoutPatchingParents().transform(transformer, null)
         } else {
           irThrow(irCall(illegalStateExceptionConstructor).apply {
-            putValueArgument(0, irString("Uninitialized builder property '${valueParameter.name}'."))
+            putValueArgument(0, irString("Uninitialized property '${valueParameter.name}'."))
           })
         }
 
         +irIfThenElse(
           type = valueParameter.type,
-          condition = irGetField(irGet(builderParameter), builderProperty.flag),
-          thenPart = irGetField(irGet(builderParameter), builderProperty.holder),
+          condition = irGetField(irGet(buildFunctionReceiverParameter), mutableProperty.flag),
+          thenPart = irGetField(irGet(buildFunctionReceiverParameter), mutableProperty.holder),
           elsePart = elsePart
         )
       })
@@ -367,7 +367,7 @@ class PiecemealBuilderGenerator(
   private fun generateBacking(
     klass: IrClass,
     property: IrProperty,
-  ): BuilderPropertyBacking {
+  ): MutablePropertyBacking {
     val getter = requireNotNull(property.getter)
     val setter = requireNotNull(property.setter)
     property.backingField = null
@@ -413,7 +413,7 @@ class PiecemealBuilderGenerator(
         condition = irGetField(irGet(dispatch), flagField),
         thenPart = irReturn(irGetField(irGet(dispatch), holderField)),
         elsePart = irThrow(irCall(illegalStateExceptionConstructor).apply {
-          putValueArgument(0, irString("Uninitialized builder property '${property.name}'."))
+          putValueArgument(0, irString("Uninitialized property '${property.name}'."))
         })
       )
     }
@@ -425,8 +425,8 @@ class PiecemealBuilderGenerator(
       +irSetField(irGet(dispatch), flagField, true.toIrConst(context.irBuiltIns.booleanType))
     }
 
-    val builderPropertyBacking = BuilderPropertyBacking(holderField, flagField)
-    property.builderPropertyBacking = builderPropertyBacking
-    return builderPropertyBacking
+    val mutablePropertyBacking = MutablePropertyBacking(holderField, flagField)
+    property.mutablePropertyBacking = mutablePropertyBacking
+    return mutablePropertyBacking
   }
 }

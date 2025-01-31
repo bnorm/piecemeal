@@ -3,7 +3,7 @@
 > **Warning**
 > Work in progress.
 
-Kotlin FIR+IR plugin for generating a class builder.
+Kotlin FIR+IR plugin for generating a nested `Mutable` class and associated `build` function.
 
 ```kotlin
 import dev.bnorm.piecemeal.Piecemeal
@@ -25,22 +25,28 @@ class Person private constructor(
     val nickname: String? = name,
     val age: Int = 0,
 ) {
-    fun newBuilder(): Builder {
-        val builder = Builder()
-        builder.name = name
-        builder.nickname = nickname
-        builder.age = age
-        return builder
+    fun toMutable(): Mutable {
+        val mutable = Mutable()
+        mutable.name = name
+        mutable.nickname = nickname
+        mutable.age = age
+        return mutable
     }
-    
+
+    inline fun copy(transform: Person.Mutable.() -> Unit): Person {
+        val tmp = this.toMutable()
+        tmp.transform
+        return tmp.build()
+    }
+
     companion object {
-        @JvmSynthetic // Hide from Java callers who should use Builder.
-        fun build(builder: Person.Builder.() -> Unit): Person {
-            return Builder().apply(builder).build()
+        @JvmSynthetic // Hide from Java callers who should use Mutable.
+        fun build(builder: Person.Mutable.() -> Unit): Person {
+            return Mutable().apply(builder).build()
         }
     }
 
-    class Builder {
+    class Mutable {
         @set:JvmSynthetic // Hide 'void' setter from Java.
         var name: String? = null
 
@@ -50,17 +56,17 @@ class Person private constructor(
         @set:JvmSynthetic // Hide 'void' setter from Java.
         var age: Int? = null
 
-        fun setName(name: String?): Builder {
+        fun setName(name: String?): Mutable {
             this.name = name
             return this
         }
 
-        fun setNickname(nickname: String?): Builder {
+        fun setNickname(nickname: String?): Mutable {
             this.nickname = nickname
             return this
         }
 
-        fun setAge(age: Int): Builder {
+        fun setAge(age: Int): Mutable {
             this.age = age
             return this
         }
