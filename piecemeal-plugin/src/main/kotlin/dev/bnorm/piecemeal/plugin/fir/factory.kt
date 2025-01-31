@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.fir.extensions.FirExtension
 import org.jetbrains.kotlin.fir.plugin.createConeType
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
+import org.jetbrains.kotlin.fir.resolve.defaultType
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
@@ -42,6 +43,7 @@ val BUILDER_CLASS_NAME = Name.identifier("Builder")
 
 val NEW_BUILDER_FUN_NAME = Name.identifier("newBuilder")
 val BUILD_FUN_NAME = Name.identifier("build")
+val COPY_FUN_NAME = Name.identifier("copy")
 
 val FUNCTION1 = ClassId(FqName("kotlin"), Name.identifier("Function1"))
 
@@ -92,6 +94,25 @@ fun FirExtension.createFunNewBuilder(
     name = callableId.callableName,
     returnType = builderClassSymbol.constructStarProjectedType(),
   )
+}
+
+fun FirExtension.createFunCopy(
+  piecemealClassSymbol: FirClassSymbol<*>,
+  callableId: CallableId,
+): FirSimpleFunction? {
+  val piecemealClassId = piecemealClassSymbol.classId
+  val builderClassSymbol = session.findClassSymbol(piecemealClassId.builder) ?: return null
+  return createMemberFunction(
+    owner = piecemealClassSymbol,
+    key = Piecemeal.Key,
+    name = callableId.callableName,
+    returnType = piecemealClassSymbol.constructStarProjectedType(),
+  ) {
+    valueParameter(
+      name = Name.identifier("transform"),
+      type = fun1Ext(session, receiver = builderClassSymbol),
+    )
+  }
 }
 
 fun FirExtension.createFunBuilderBuild(

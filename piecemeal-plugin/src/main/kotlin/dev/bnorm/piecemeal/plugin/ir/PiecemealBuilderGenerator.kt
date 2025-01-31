@@ -17,6 +17,9 @@
 package dev.bnorm.piecemeal.plugin.ir
 
 import dev.bnorm.piecemeal.plugin.Piecemeal
+import dev.bnorm.piecemeal.plugin.fir.BUILD_FUN_NAME
+import dev.bnorm.piecemeal.plugin.fir.COPY_FUN_NAME
+import dev.bnorm.piecemeal.plugin.fir.NEW_BUILDER_FUN_NAME
 import dev.bnorm.piecemeal.plugin.toJavaSetter
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -33,6 +36,7 @@ import org.jetbrains.kotlin.ir.expressions.IrGetValue
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
+import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.*
@@ -40,6 +44,7 @@ import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.name.Name
+import kotlin.RuntimeException
 
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 class PiecemealBuilderGenerator(
@@ -79,6 +84,8 @@ class PiecemealBuilderGenerator(
           (declaration.parent as? IrClass)?.isCompanion == true -> generateBuilderFunction(declaration)
           else -> generateBuildFunction(declaration)
         }
+
+        COPY_FUN_NAME -> generateCopyFunction(declaration)
 
         else -> generateBuilderSetter(declaration)
       }
@@ -192,6 +199,62 @@ class PiecemealBuilderGenerator(
       }
 
       +irReturn(constructorCall)
+    }
+  }
+
+  /**
+   * ```kotlin
+   * fun copy(transform: Person.Builder.() -> Unit): Person {
+   *     val tmp = newBuilder()
+   *     tmp.transform()
+   *     return tmp.build()
+   * }
+   * ```
+   */
+  private fun generateCopyFunction(function: IrSimpleFunction): IrBody? {
+    val transformLambda = function.valueParameters.single()
+    val builderType = (transformLambda.type as IrSimpleType).arguments[0] as IrType
+    val builderClass = builderType.classifierOrNull?.owner as? IrClass ?: return null
+
+    val piecemealClass = function.parentAsClass
+    val newBuilderFunction = piecemealClass.functions.single {
+      it.name == NEW_BUILDER_FUN_NAME &&
+        it.extensionReceiverParameter == null &&
+        it.valueParameters.isEmpty()
+    }
+
+    val invoke = transformLambda.type.classOrFail.functions
+      .single {
+        val owner = it.owner
+        owner.name == Name.identifier("invoke") &&
+          owner.extensionReceiverParameter == null &&
+          owner.valueParameters.size == 1 &&
+          owner.valueParameters.single().type.classifierOrNull is IrTypeParameterSymbol
+      }
+
+    val build = builderClass.functions
+      .single {
+        it.name == BUILD_FUN_NAME &&
+          it.extensionReceiverParameter == null &&
+          it.valueParameters.isEmpty()
+      }
+
+    val irBuilder = DeclarationIrBuilder(context, function.symbol)
+    return irBuilder.irBlockBody {
+      val tmp = irTemporary(
+        value = irCall(newBuilderFunction).apply {
+          dispatchReceiver = irGet(function.dispatchReceiverParameter!!)
+        },
+      )
+
+      +irCall(invoke).apply {
+        dispatchReceiver = irGet(transformLambda)
+        putValueArgument(0, irGet(tmp))
+      }
+
+      +irReturn(irCall(build).apply {
+        dispatchReceiver = irGet(tmp)
+      })
     }
   }
 

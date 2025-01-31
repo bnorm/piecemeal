@@ -27,8 +27,8 @@ fun main() {
   }
   println(melinda)
 
-  melinda = melinda.newBuilder().apply {
+  melinda = melinda.copy {
     age = 34
-  }.build()
+  }
   println(melinda)
 }
