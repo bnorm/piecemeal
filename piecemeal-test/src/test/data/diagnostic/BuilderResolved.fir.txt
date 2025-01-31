@@ -15,6 +15,13 @@ FILE: BuilderResolved.kt
 
         public final fun newBuilder(): R|Person.Builder|
 
+        public final inline fun copy(transform: R|Person.Builder.() -> kotlin/Unit|): R|Person|
+            [R|Contract description]
+             <
+                CallsInPlace(transform, EXACTLY_ONCE)
+            >
+
+
         public final companion object Companion : R|kotlin/Any| {
             public final inline fun build(builder: R|Person.Builder.() -> kotlin/Unit|): R|Person|
                 [R|Contract description]
