@@ -37,6 +37,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirValueParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
+import org.jetbrains.kotlin.metadata.ProtoBuf.Effect.InvocationKind.EXACTLY_ONCE
 import org.jetbrains.kotlin.name.*
 
 val BUILDER_CLASS_NAME = Name.identifier("Builder")
@@ -102,15 +103,30 @@ fun FirExtension.createFunCopy(
 ): FirSimpleFunction? {
   val piecemealClassId = piecemealClassSymbol.classId
   val builderClassSymbol = session.findClassSymbol(piecemealClassId.builder) ?: return null
+  val parameterName = "transform"
   return createMemberFunction(
     owner = piecemealClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
     returnType = piecemealClassSymbol.constructStarProjectedType(),
   ) {
+    status {
+      isInline = true
+    }
     valueParameter(
-      name = Name.identifier("transform"),
+      name = Name.identifier(parameterName),
       type = fun1Ext(session, receiver = builderClassSymbol),
+    )
+  }.apply {
+    replaceContractDescription(
+      newContractDescription = buildResolvedContractDescription {
+        effects += buildEffectDeclaration {
+          effect = ConeCallsEffectDeclaration(
+            valueParameterReference = KtValueParameterReference(0, parameterName),
+            kind = EventOccurrencesRange.EXACTLY_ONCE,
+          )
+        }
+      },
     )
   }
 }
