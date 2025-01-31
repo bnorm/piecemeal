@@ -18,7 +18,12 @@ package dev.bnorm.piecemeal.plugin.fir
 
 import dev.bnorm.piecemeal.plugin.Piecemeal
 import dev.bnorm.piecemeal.plugin.toJavaSetter
+import org.jetbrains.kotlin.contracts.description.EventOccurrencesRange
+import org.jetbrains.kotlin.contracts.description.KtValueParameterReference
 import org.jetbrains.kotlin.fir.FirSession
+import org.jetbrains.kotlin.fir.contracts.builder.buildEffectDeclaration
+import org.jetbrains.kotlin.fir.contracts.builder.buildResolvedContractDescription
+import org.jetbrains.kotlin.fir.contracts.description.ConeCallsEffectDeclaration
 import org.jetbrains.kotlin.fir.declarations.FirProperty
 import org.jetbrains.kotlin.fir.declarations.FirSimpleFunction
 import org.jetbrains.kotlin.fir.extensions.ExperimentalTopLevelDeclarationsGenerationApi
@@ -161,5 +166,11 @@ fun FirExtension.createFunPiecemealDsl(
       isInline = true
     }
     valueParameter(Name.identifier("builder"), builderType)
+  }.apply {
+    replaceContractDescription(buildResolvedContractDescription {
+      effects += buildEffectDeclaration {
+        effect = ConeCallsEffectDeclaration(KtValueParameterReference(0, "builder"), EventOccurrencesRange.EXACTLY_ONCE)
+      }
+    })
   }
 }

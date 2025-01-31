@@ -38,4 +38,10 @@ public class BoxTestGenerated extends AbstractBoxTest {
   public void testBuilderWithSetters() {
     runTest("piecemeal-test/src/test/data/box/BuilderWithSetters.kt");
   }
+
+  @Test
+  @TestMetadata("InlineBuild.kt")
+  public void testInlineBuild() {
+    runTest("piecemeal-test/src/test/data/box/InlineBuild.kt");
+  }
 }
