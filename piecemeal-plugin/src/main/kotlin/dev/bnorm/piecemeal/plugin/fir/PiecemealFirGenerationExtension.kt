@@ -72,17 +72,21 @@ class PiecemealFirGenerationExtension(
 
     val function = when {
 
-      callableId.classId in piecemealClassIds && callableId.callableName == NEW_BUILDER_FUN_NAME ->
-        createFunNewBuilder(
-          piecemealClassSymbol = owner,
-          callableId = callableId,
-        )
+      callableId.classId in piecemealClassIds -> when (callableId.callableName) {
+        NEW_BUILDER_FUN_NAME ->
+          createFunNewBuilder(
+            piecemealClassSymbol = owner,
+            callableId = callableId,
+          )
 
-      callableId.classId in piecemealClassIds && callableId.callableName == COPY_FUN_NAME ->
-        createFunCopy(
-          piecemealClassSymbol = owner,
-          callableId = callableId,
-        )
+        COPY_FUN_NAME ->
+          createFunCopy(
+            piecemealClassSymbol = owner,
+            callableId = callableId,
+          )
+
+        else -> null
+      }
 
       callableId.classId in piecemealCompanionClassIds && callableId.callableName == BUILD_FUN_NAME ->
         createFunPiecemealDsl(

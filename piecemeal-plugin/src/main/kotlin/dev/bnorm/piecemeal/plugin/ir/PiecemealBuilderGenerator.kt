@@ -44,7 +44,6 @@ import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.name.Name
-import kotlin.RuntimeException
 
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 class PiecemealBuilderGenerator(

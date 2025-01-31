@@ -1,6 +1,5 @@
 import dev.bnorm.piecemeal.Piecemeal
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @Piecemeal
 class Thing(
