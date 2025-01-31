@@ -16,10 +16,14 @@
 
 package dev.bnorm.piecemeal
 
+import dev.bnorm.piecemeal.BuildConfig.SUPPORT_LIBRARY_COORDINATES
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet.Companion.COMMON_MAIN_SOURCE_SET_NAME
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetContainer
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
@@ -27,6 +31,22 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 class PiecemealGradlePlugin : KotlinCompilerPluginSupportPlugin {
   override fun apply(target: Project) {
     target.extensions.create("piecemeal", PiecemealGradleExtension::class.java)
+
+    target.afterEvaluate {
+      if (target.plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
+        val kotlin = target.extensions.getByName("kotlin") as KotlinSourceSetContainer
+        kotlin.sourceSets.getByName(COMMON_MAIN_SOURCE_SET_NAME) { sourceSet ->
+          sourceSet.dependencies {
+            implementation(SUPPORT_LIBRARY_COORDINATES)
+          }
+        }
+      } else {
+        if (target.plugins.hasPlugin("org.gradle.java-test-fixtures")) {
+          target.dependencies.add("testFixturesImplementation", SUPPORT_LIBRARY_COORDINATES)
+        }
+        target.dependencies.add(IMPLEMENTATION_CONFIGURATION_NAME, SUPPORT_LIBRARY_COORDINATES)
+      }
+    }
   }
 
   override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean = true
@@ -44,10 +64,6 @@ class PiecemealGradlePlugin : KotlinCompilerPluginSupportPlugin {
   ): Provider<List<SubpluginOption>> {
     val project = kotlinCompilation.target.project
     val extension = project.extensions.getByType(PiecemealGradleExtension::class.java)
-
-    kotlinCompilation.dependencies {
-      implementation("${BuildConfig.SUPPORT_LIBRARY_GROUP}:${BuildConfig.SUPPORT_LIBRARY_NAME}:${BuildConfig.SUPPORT_LIBRARY_VERSION}")
-    }
 
     return project.provider {
       listOf(
