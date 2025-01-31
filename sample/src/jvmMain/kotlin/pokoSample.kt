@@ -27,4 +27,9 @@ fun main() {
   check(chicago1 == chicago2) // Uses Poko-generated equals
   println(chicago1) // Uses Poko-generated toString
 
+  val newYork = chicago1.copy {
+    name = "New York"
+  }
+  check(newYork != chicago1)
+  println(newYork)
 }

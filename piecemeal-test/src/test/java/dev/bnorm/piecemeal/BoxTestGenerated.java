@@ -40,6 +40,12 @@ public class BoxTestGenerated extends AbstractBoxTest {
   }
 
   @Test
+  @TestMetadata("Copy.kt")
+  public void testCopy() {
+    runTest("piecemeal-test/src/test/data/box/Copy.kt");
+  }
+
+  @Test
   @TestMetadata("InlineBuild.kt")
   public void testInlineBuild() {
     runTest("piecemeal-test/src/test/data/box/InlineBuild.kt");

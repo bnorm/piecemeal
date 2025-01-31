@@ -31,17 +31,20 @@ import org.jetbrains.kotlin.fir.extensions.FirExtension
 import org.jetbrains.kotlin.fir.plugin.createConeType
 import org.jetbrains.kotlin.fir.plugin.createMemberFunction
 import org.jetbrains.kotlin.fir.plugin.createMemberProperty
+import org.jetbrains.kotlin.fir.resolve.defaultType
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirValueParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
+import org.jetbrains.kotlin.metadata.ProtoBuf.Effect.InvocationKind.EXACTLY_ONCE
 import org.jetbrains.kotlin.name.*
 
 val BUILDER_CLASS_NAME = Name.identifier("Builder")
 
 val NEW_BUILDER_FUN_NAME = Name.identifier("newBuilder")
 val BUILD_FUN_NAME = Name.identifier("build")
+val COPY_FUN_NAME = Name.identifier("copy")
 
 val FUNCTION1 = ClassId(FqName("kotlin"), Name.identifier("Function1"))
 
@@ -92,6 +95,40 @@ fun FirExtension.createFunNewBuilder(
     name = callableId.callableName,
     returnType = builderClassSymbol.constructStarProjectedType(),
   )
+}
+
+fun FirExtension.createFunCopy(
+  piecemealClassSymbol: FirClassSymbol<*>,
+  callableId: CallableId,
+): FirSimpleFunction? {
+  val piecemealClassId = piecemealClassSymbol.classId
+  val builderClassSymbol = session.findClassSymbol(piecemealClassId.builder) ?: return null
+  val parameterName = "transform"
+  return createMemberFunction(
+    owner = piecemealClassSymbol,
+    key = Piecemeal.Key,
+    name = callableId.callableName,
+    returnType = piecemealClassSymbol.constructStarProjectedType(),
+  ) {
+    status {
+      isInline = true
+    }
+    valueParameter(
+      name = Name.identifier(parameterName),
+      type = fun1Ext(session, receiver = builderClassSymbol),
+    )
+  }.apply {
+    replaceContractDescription(
+      newContractDescription = buildResolvedContractDescription {
+        effects += buildEffectDeclaration {
+          effect = ConeCallsEffectDeclaration(
+            valueParameterReference = KtValueParameterReference(0, parameterName),
+            kind = EventOccurrencesRange.EXACTLY_ONCE,
+          )
+        }
+      },
+    )
+  }
 }
 
 fun FirExtension.createFunBuilderBuild(
