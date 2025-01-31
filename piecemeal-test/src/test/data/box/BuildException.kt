@@ -12,7 +12,7 @@ class Test(
 fun box(): String {
   assertEquals(
     expected = "Uninitialized builder property 'nullableValue'.",
-    actual = assertFailsWith<IllegalArgumentException> {
+    actual = assertFailsWith<IllegalStateException> {
       Test.build {
       }
     }.message,
@@ -20,7 +20,7 @@ fun box(): String {
 
   assertEquals(
     expected = "Uninitialized builder property 'nonNullValue'.",
-    actual = assertFailsWith<IllegalArgumentException> {
+    actual = assertFailsWith<IllegalStateException> {
       Test.build {
         nullableValue = null
       }
@@ -29,7 +29,7 @@ fun box(): String {
 
   assertEquals(
     expected = "Uninitialized builder property 'primitiveValue'.",
-    actual = assertFailsWith<IllegalArgumentException> {
+    actual = assertFailsWith<IllegalStateException> {
       Test.build {
         nullableValue = null
         nonNullValue = ""
