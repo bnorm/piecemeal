@@ -87,8 +87,8 @@ FILE fqName:<root> fileName:/Builder.kt
                 BRANCH
                   if: CONST Boolean type=kotlin.Boolean value=true
                   then: THROW type=kotlin.Nothing
-                    CALL 'public final fun illegalArgumentException (arg0: kotlin.String): kotlin.Nothing declared in kotlin.internal.ir' type=kotlin.Nothing origin=null
-                      arg0: CONST String type=kotlin.String value="Uninitialized builder property 'name'."
+                    CONSTRUCTOR_CALL 'public constructor <init> (p0: @[FlexibleNullability] kotlin.String?) declared in java.lang.IllegalStateException' type=java.lang.IllegalStateException origin=null
+                      p0: CONST String type=kotlin.String value="Uninitialized builder property 'name'."
           VAR IR_TEMPORARY_VARIABLE name:tmp_1 type:kotlin.String? [val]
             BLOCK type=kotlin.String? origin=null
               WHEN type=kotlin.String? origin=null
@@ -131,8 +131,8 @@ FILE fqName:<root> fileName:/Builder.kt
               BRANCH
                 if: CONST Boolean type=kotlin.Boolean value=true
                 then: THROW type=kotlin.Nothing
-                  CALL 'public final fun illegalArgumentException (arg0: kotlin.String): kotlin.Nothing declared in kotlin.internal.ir' type=kotlin.Nothing origin=null
-                    arg0: CONST String type=kotlin.String value="Uninitialized builder property 'age'."
+                  CONSTRUCTOR_CALL 'public constructor <init> (p0: @[FlexibleNullability] kotlin.String?) declared in java.lang.IllegalStateException' type=java.lang.IllegalStateException origin=null
+                    p0: CONST String type=kotlin.String value="Uninitialized builder property 'age'."
         FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:<set-age> visibility:public modality:FINAL <> ($this:<root>.Person.Builder, <set-?>:kotlin.Int) returnType:kotlin.Unit
           correspondingProperty: PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age visibility:public modality:FINAL [var]
           $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
@@ -159,8 +159,8 @@ FILE fqName:<root> fileName:/Builder.kt
               BRANCH
                 if: CONST Boolean type=kotlin.Boolean value=true
                 then: THROW type=kotlin.Nothing
-                  CALL 'public final fun illegalArgumentException (arg0: kotlin.String): kotlin.Nothing declared in kotlin.internal.ir' type=kotlin.Nothing origin=null
-                    arg0: CONST String type=kotlin.String value="Uninitialized builder property 'name'."
+                  CONSTRUCTOR_CALL 'public constructor <init> (p0: @[FlexibleNullability] kotlin.String?) declared in java.lang.IllegalStateException' type=java.lang.IllegalStateException origin=null
+                    p0: CONST String type=kotlin.String value="Uninitialized builder property 'name'."
         FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:<set-name> visibility:public modality:FINAL <> ($this:<root>.Person.Builder, <set-?>:kotlin.String) returnType:kotlin.Unit
           correspondingProperty: PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name visibility:public modality:FINAL [var]
           $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder
@@ -187,8 +187,8 @@ FILE fqName:<root> fileName:/Builder.kt
               BRANCH
                 if: CONST Boolean type=kotlin.Boolean value=true
                 then: THROW type=kotlin.Nothing
-                  CALL 'public final fun illegalArgumentException (arg0: kotlin.String): kotlin.Nothing declared in kotlin.internal.ir' type=kotlin.Nothing origin=null
-                    arg0: CONST String type=kotlin.String value="Uninitialized builder property 'nickname'."
+                  CONSTRUCTOR_CALL 'public constructor <init> (p0: @[FlexibleNullability] kotlin.String?) declared in java.lang.IllegalStateException' type=java.lang.IllegalStateException origin=null
+                    p0: CONST String type=kotlin.String value="Uninitialized builder property 'nickname'."
         FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:<set-nickname> visibility:public modality:FINAL <> ($this:<root>.Person.Builder, <set-?>:kotlin.String?) returnType:kotlin.Unit
           correspondingProperty: PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname visibility:public modality:FINAL [var]
           $this: VALUE_PARAMETER name:<this> type:<root>.Person.Builder

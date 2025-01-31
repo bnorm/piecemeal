@@ -43,12 +43,21 @@ import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
+import org.jetbrains.kotlin.name.ClassId
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 class PiecemealBuilderGenerator(
   private val context: IrPluginContext,
 ) : IrElementVisitorVoid {
+  private val nullableStringType = context.irBuiltIns.stringType.makeNullable()
+  private val illegalStateExceptionConstructor =
+    context.referenceConstructors(ClassId.topLevel(FqName("kotlin.IllegalStateException")))
+      .single { constructor ->
+        val parameter = constructor.owner.valueParameters.singleOrNull() ?: return@single false
+        parameter.type == nullableStringType
+      }
 
   // TODO support class type parameters
   // TODO remove defaults from primary constructor?
@@ -339,8 +348,7 @@ class PiecemealBuilderGenerator(
         val elsePart = if (defaultValue != null) {
           defaultValue.expression.deepCopyWithoutPatchingParents().transform(transformer, null)
         } else {
-          // TODO IllegalStateException
-          irThrow(irCall(context.irBuiltIns.illegalArgumentExceptionSymbol).apply {
+          irThrow(irCall(illegalStateExceptionConstructor).apply {
             putValueArgument(0, irString("Uninitialized builder property '${valueParameter.name}'."))
           })
         }
@@ -404,8 +412,7 @@ class PiecemealBuilderGenerator(
         type = getter.returnType,
         condition = irGetField(irGet(dispatch), flagField),
         thenPart = irReturn(irGetField(irGet(dispatch), holderField)),
-        // TODO IllegalStateException
-        elsePart = irThrow(irCall(context.irBuiltIns.illegalArgumentExceptionSymbol).apply {
+        elsePart = irThrow(irCall(illegalStateExceptionConstructor).apply {
           putValueArgument(0, irString("Uninitialized builder property '${property.name}'."))
         })
       )
