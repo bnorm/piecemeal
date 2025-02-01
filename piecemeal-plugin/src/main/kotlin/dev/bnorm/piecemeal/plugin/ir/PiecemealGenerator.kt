@@ -297,12 +297,12 @@ class PiecemealGenerator(
    * ```
    */
   private fun generateBuilderFunction(function: IrSimpleFunction): IrBody? {
-    val builderLambda = function.valueParameters.single()
-    val builderType = (builderLambda.type as IrSimpleType).arguments[0] as IrType
-    val mutableClass = builderType.classifierOrNull?.owner as? IrClass ?: return null
+    val builderActionLambda = function.valueParameters.single()
+    val builderActionType = (builderActionLambda.type as IrSimpleType).arguments[0] as IrType
+    val mutableClass = builderActionType.classifierOrNull?.owner as? IrClass ?: return null
     val mutableConstructor = mutableClass.primaryConstructor ?: return null
 
-    val invoke = builderLambda.type.classOrNull!!.functions
+    val invoke = builderActionLambda.type.classOrNull!!.functions
       .filter { !it.owner.isFakeOverride } // TODO best way to find single access method?
       .single()
 
@@ -315,7 +315,7 @@ class PiecemealGenerator(
       val tmp = irTemporary(value = irCall(mutableConstructor))
 
       +irCall(invoke).apply {
-        dispatchReceiver = irGet(builderLambda)
+        dispatchReceiver = irGet(builderActionLambda)
         putValueArgument(0, irGet(tmp))
       }
 

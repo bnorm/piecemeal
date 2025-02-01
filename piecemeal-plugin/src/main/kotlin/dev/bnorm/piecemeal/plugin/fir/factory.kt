@@ -188,8 +188,8 @@ fun FirExtension.createFunPiecemealDsl(
   val piecemealClassId = companionClassSymbol.classId.outerClassId!!
   val piecemealClassSymbol = session.findClassSymbol(piecemealClassId)!!
   val mutableClassSymbol = session.findClassSymbol(piecemealClassId.mutable) ?: return null
-  val builderType = fun1Ext(session, receiver = mutableClassSymbol)
-  val paramName = "builder"
+  val builderActionType = fun1Ext(session, receiver = mutableClassSymbol)
+  val paramName = "builderAction"
   return createMemberFunction(
     owner = companionClassSymbol,
     key = Piecemeal.Key,
@@ -199,7 +199,7 @@ fun FirExtension.createFunPiecemealDsl(
     status {
       isInline = true
     }
-    valueParameter(Name.identifier(paramName), builderType)
+    valueParameter(Name.identifier(paramName), builderActionType)
   }.apply {
     replaceContractDescription(buildResolvedContractDescription {
       effects += buildEffectDeclaration {

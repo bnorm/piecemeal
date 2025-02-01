@@ -48,10 +48,10 @@ FILE: MutableResolved.kt
         }
 
         public final companion object Companion : R|kotlin/Any| {
-            public final inline fun build(builder: R|Person.Mutable.() -> kotlin/Unit|): R|Person|
+            public final inline fun build(builderAction: R|Person.Mutable.() -> kotlin/Unit|): R|Person|
                 [R|Contract description]
                  <
-                    CallsInPlace(builder, EXACTLY_ONCE)
+                    CallsInPlace(builderAction, EXACTLY_ONCE)
                 >
 
 
