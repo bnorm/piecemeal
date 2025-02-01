@@ -12,12 +12,12 @@ class Person(
 }
 
 fun main() {
-  var brian = Person.Builder()
+  var brian = Person.Mutable()
     .setName("Brian")
     .build()
   println(brian)
 
-  brian = brian.newBuilder()
+  brian = brian.toMutable()
     .setAge(35)
     .build()
   println(brian)

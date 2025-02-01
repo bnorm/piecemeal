@@ -20,9 +20,9 @@ import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.irAttribute
 
-class BuilderPropertyBacking(
+class MutablePropertyBacking(
   val holder: IrField,
   val flag: IrField
 )
 
-var IrProperty.builderPropertyBacking: BuilderPropertyBacking? by irAttribute(followAttributeOwner = false)
+var IrProperty.mutablePropertyBacking: MutablePropertyBacking? by irAttribute(followAttributeOwner = false)

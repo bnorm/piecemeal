@@ -1,0 +1,320 @@
+FILE fqName:<root> fileName:/MutableWithSetters.kt
+  CLASS CLASS name:Person modality:FINAL visibility:public superTypes:[kotlin.Any]
+    annotations:
+      Piecemeal
+    $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:<root>.Person
+    PROPERTY name:name visibility:public modality:FINAL [val]
+      FIELD PROPERTY_BACKING_FIELD name:name type:kotlin.String visibility:private [final]
+        EXPRESSION_BODY
+          GET_VAR 'name: kotlin.String declared in <root>.Person.<init>' type=kotlin.String origin=INITIALIZE_PROPERTY_FROM_PARAMETER
+      FUN DEFAULT_PROPERTY_ACCESSOR name:<get-name> visibility:public modality:FINAL <> ($this:<root>.Person) returnType:kotlin.String
+        correspondingProperty: PROPERTY name:name visibility:public modality:FINAL [val]
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person
+        BLOCK_BODY
+          RETURN type=kotlin.Nothing from='public final fun <get-name> (): kotlin.String declared in <root>.Person'
+            GET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:name type:kotlin.String visibility:private [final]' type=kotlin.String origin=null
+              receiver: GET_VAR '<this>: <root>.Person declared in <root>.Person.<get-name>' type=<root>.Person origin=null
+    PROPERTY name:nickname visibility:public modality:FINAL [val]
+      FIELD PROPERTY_BACKING_FIELD name:nickname type:kotlin.String? visibility:private [final]
+        EXPRESSION_BODY
+          GET_VAR 'nickname: kotlin.String? declared in <root>.Person.<init>' type=kotlin.String? origin=INITIALIZE_PROPERTY_FROM_PARAMETER
+      FUN DEFAULT_PROPERTY_ACCESSOR name:<get-nickname> visibility:public modality:FINAL <> ($this:<root>.Person) returnType:kotlin.String?
+        correspondingProperty: PROPERTY name:nickname visibility:public modality:FINAL [val]
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person
+        BLOCK_BODY
+          RETURN type=kotlin.Nothing from='public final fun <get-nickname> (): kotlin.String? declared in <root>.Person'
+            GET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:nickname type:kotlin.String? visibility:private [final]' type=kotlin.String? origin=null
+              receiver: GET_VAR '<this>: <root>.Person declared in <root>.Person.<get-nickname>' type=<root>.Person origin=null
+    PROPERTY name:age visibility:public modality:FINAL [val]
+      FIELD PROPERTY_BACKING_FIELD name:age type:kotlin.Int visibility:private [final]
+        EXPRESSION_BODY
+          GET_VAR 'age: kotlin.Int declared in <root>.Person.<init>' type=kotlin.Int origin=INITIALIZE_PROPERTY_FROM_PARAMETER
+      FUN DEFAULT_PROPERTY_ACCESSOR name:<get-age> visibility:public modality:FINAL <> ($this:<root>.Person) returnType:kotlin.Int
+        correspondingProperty: PROPERTY name:age visibility:public modality:FINAL [val]
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person
+        BLOCK_BODY
+          RETURN type=kotlin.Nothing from='public final fun <get-age> (): kotlin.Int declared in <root>.Person'
+            GET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:age type:kotlin.Int visibility:private [final]' type=kotlin.Int origin=null
+              receiver: GET_VAR '<this>: <root>.Person declared in <root>.Person.<get-age>' type=<root>.Person origin=null
+    CLASS GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] CLASS name:Mutable modality:FINAL visibility:public superTypes:[kotlin.Any]
+      $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:<root>.Person.Mutable
+      FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name$PiecemealFlag type:kotlin.Boolean visibility:private
+        EXPRESSION_BODY
+          CONST Boolean type=kotlin.Boolean value=false
+      FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name$PiecemealHolder type:kotlin.String? visibility:private
+        EXPRESSION_BODY
+          CONST Null type=kotlin.String? value=null
+      FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname$PiecemealFlag type:kotlin.Boolean visibility:private
+        EXPRESSION_BODY
+          CONST Boolean type=kotlin.Boolean value=false
+      FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname$PiecemealHolder type:kotlin.String? visibility:private
+        EXPRESSION_BODY
+          CONST Null type=kotlin.String? value=null
+      FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age$PiecemealFlag type:kotlin.Boolean visibility:private
+        EXPRESSION_BODY
+          CONST Boolean type=kotlin.Boolean value=false
+      FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age$PiecemealHolder type:kotlin.Int visibility:private
+        EXPRESSION_BODY
+          CONST Int type=kotlin.Int value=0
+      CONSTRUCTOR GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] visibility:public <> () returnType:<root>.Person.Mutable [primary]
+        BLOCK_BODY
+          DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> () declared in kotlin.Any'
+          INSTANCE_INITIALIZER_CALL classDescriptor='CLASS GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] CLASS name:Mutable modality:FINAL visibility:public superTypes:[kotlin.Any]'
+      FUN FAKE_OVERRIDE name:equals visibility:public modality:OPEN <> ($this:kotlin.Any, other:kotlin.Any?) returnType:kotlin.Boolean [fake_override,operator]
+        overridden:
+          public open fun equals (other: kotlin.Any?): kotlin.Boolean declared in kotlin.Any
+        $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+        VALUE_PARAMETER name:other index:0 type:kotlin.Any?
+      FUN FAKE_OVERRIDE name:hashCode visibility:public modality:OPEN <> ($this:kotlin.Any) returnType:kotlin.Int [fake_override]
+        overridden:
+          public open fun hashCode (): kotlin.Int declared in kotlin.Any
+        $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+      FUN FAKE_OVERRIDE name:toString visibility:public modality:OPEN <> ($this:kotlin.Any) returnType:kotlin.String [fake_override]
+        overridden:
+          public open fun toString (): kotlin.String declared in kotlin.Any
+        $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+      FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:build visibility:public modality:FINAL <> ($this:<root>.Person.Mutable) returnType:<root>.Person
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person.Mutable
+        BLOCK_BODY
+          VAR IR_TEMPORARY_VARIABLE name:tmp_0 type:kotlin.String [val]
+            BLOCK type=kotlin.String origin=null
+              WHEN type=kotlin.String origin=null
+                BRANCH
+                  if: GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name$PiecemealFlag type:kotlin.Boolean visibility:private declared in <root>.Person.Mutable' type=kotlin.Boolean origin=null
+                    receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.build' type=<root>.Person.Mutable origin=null
+                  then: GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name$PiecemealHolder type:kotlin.String? visibility:private declared in <root>.Person.Mutable' type=kotlin.String? origin=null
+                    receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.build' type=<root>.Person.Mutable origin=null
+                BRANCH
+                  if: CONST Boolean type=kotlin.Boolean value=true
+                  then: THROW type=kotlin.Nothing
+                    CONSTRUCTOR_CALL 'public constructor <init> (p0: @[FlexibleNullability] kotlin.String?) declared in java.lang.IllegalStateException' type=java.lang.IllegalStateException origin=null
+                      p0: CONST String type=kotlin.String value="Uninitialized property 'name'."
+          VAR IR_TEMPORARY_VARIABLE name:tmp_1 type:kotlin.String? [val]
+            BLOCK type=kotlin.String? origin=null
+              WHEN type=kotlin.String? origin=null
+                BRANCH
+                  if: GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname$PiecemealFlag type:kotlin.Boolean visibility:private declared in <root>.Person.Mutable' type=kotlin.Boolean origin=null
+                    receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.build' type=<root>.Person.Mutable origin=null
+                  then: GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname$PiecemealHolder type:kotlin.String? visibility:private declared in <root>.Person.Mutable' type=kotlin.String? origin=null
+                    receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.build' type=<root>.Person.Mutable origin=null
+                BRANCH
+                  if: CONST Boolean type=kotlin.Boolean value=true
+                  then: GET_VAR 'val tmp_0: kotlin.String declared in <root>.Person.Mutable.build' type=kotlin.String origin=null
+          VAR IR_TEMPORARY_VARIABLE name:tmp_2 type:kotlin.Int [val]
+            BLOCK type=kotlin.Int origin=null
+              WHEN type=kotlin.Int origin=null
+                BRANCH
+                  if: GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age$PiecemealFlag type:kotlin.Boolean visibility:private declared in <root>.Person.Mutable' type=kotlin.Boolean origin=null
+                    receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.build' type=<root>.Person.Mutable origin=null
+                  then: GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age$PiecemealHolder type:kotlin.Int visibility:private declared in <root>.Person.Mutable' type=kotlin.Int origin=null
+                    receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.build' type=<root>.Person.Mutable origin=null
+                BRANCH
+                  if: CONST Boolean type=kotlin.Boolean value=true
+                  then: CONST Int type=kotlin.Int value=0
+          RETURN type=kotlin.Nothing from='public final fun build (): <root>.Person declared in <root>.Person.Mutable'
+            CONSTRUCTOR_CALL 'private constructor <init> (name: kotlin.String, nickname: kotlin.String?, age: kotlin.Int) declared in <root>.Person' type=<root>.Person origin=null
+              name: GET_VAR 'val tmp_0: kotlin.String declared in <root>.Person.Mutable.build' type=kotlin.String origin=null
+              nickname: GET_VAR 'val tmp_1: kotlin.String? declared in <root>.Person.Mutable.build' type=kotlin.String? origin=null
+              age: GET_VAR 'val tmp_2: kotlin.Int declared in <root>.Person.Mutable.build' type=kotlin.Int origin=null
+      FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:setAge visibility:public modality:FINAL <> ($this:<root>.Person.Mutable, age:kotlin.Int) returnType:<root>.Person.Mutable
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person.Mutable
+        VALUE_PARAMETER GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age index:0 type:kotlin.Int
+        BLOCK_BODY
+          CALL 'public final fun <set-age> (<set-?>: kotlin.Int): kotlin.Unit declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+            $this: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.setAge' type=<root>.Person.Mutable origin=null
+            <set-?>: GET_VAR 'age: kotlin.Int declared in <root>.Person.Mutable.setAge' type=kotlin.Int origin=null
+          RETURN type=kotlin.Nothing from='public final fun setAge (age: kotlin.Int): <root>.Person.Mutable declared in <root>.Person.Mutable'
+            GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.setAge' type=<root>.Person.Mutable origin=null
+      FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:setName visibility:public modality:FINAL <> ($this:<root>.Person.Mutable, name:kotlin.String) returnType:<root>.Person.Mutable
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person.Mutable
+        VALUE_PARAMETER GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name index:0 type:kotlin.String
+        BLOCK_BODY
+          CALL 'public final fun <set-name> (<set-?>: kotlin.String): kotlin.Unit declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+            $this: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.setName' type=<root>.Person.Mutable origin=null
+            <set-?>: GET_VAR 'name: kotlin.String declared in <root>.Person.Mutable.setName' type=kotlin.String origin=null
+          RETURN type=kotlin.Nothing from='public final fun setName (name: kotlin.String): <root>.Person.Mutable declared in <root>.Person.Mutable'
+            GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.setName' type=<root>.Person.Mutable origin=null
+      FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:setNickname visibility:public modality:FINAL <> ($this:<root>.Person.Mutable, nickname:kotlin.String?) returnType:<root>.Person.Mutable
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person.Mutable
+        VALUE_PARAMETER GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname index:0 type:kotlin.String?
+        BLOCK_BODY
+          CALL 'public final fun <set-nickname> (<set-?>: kotlin.String?): kotlin.Unit declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+            $this: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.setNickname' type=<root>.Person.Mutable origin=null
+            <set-?>: GET_VAR 'nickname: kotlin.String? declared in <root>.Person.Mutable.setNickname' type=kotlin.String? origin=null
+          RETURN type=kotlin.Nothing from='public final fun setNickname (nickname: kotlin.String?): <root>.Person.Mutable declared in <root>.Person.Mutable'
+            GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.setNickname' type=<root>.Person.Mutable origin=null
+      PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age visibility:public modality:FINAL [var]
+        FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:<get-age> visibility:public modality:FINAL <> ($this:<root>.Person.Mutable) returnType:kotlin.Int
+          correspondingProperty: PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Mutable
+          BLOCK_BODY
+            WHEN type=kotlin.Int origin=null
+              BRANCH
+                if: GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age$PiecemealFlag type:kotlin.Boolean visibility:private declared in <root>.Person.Mutable' type=kotlin.Boolean origin=null
+                  receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<get-age>' type=<root>.Person.Mutable origin=null
+                then: RETURN type=kotlin.Nothing from='public final fun <get-age> (): kotlin.Int declared in <root>.Person.Mutable'
+                  GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age$PiecemealHolder type:kotlin.Int visibility:private declared in <root>.Person.Mutable' type=kotlin.Int origin=null
+                    receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<get-age>' type=<root>.Person.Mutable origin=null
+              BRANCH
+                if: CONST Boolean type=kotlin.Boolean value=true
+                then: THROW type=kotlin.Nothing
+                  CONSTRUCTOR_CALL 'public constructor <init> (p0: @[FlexibleNullability] kotlin.String?) declared in java.lang.IllegalStateException' type=java.lang.IllegalStateException origin=null
+                    p0: CONST String type=kotlin.String value="Uninitialized property 'age'."
+        FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:<set-age> visibility:public modality:FINAL <> ($this:<root>.Person.Mutable, <set-?>:kotlin.Int) returnType:kotlin.Unit
+          correspondingProperty: PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Mutable
+          VALUE_PARAMETER name:<set-?> index:0 type:kotlin.Int
+          BLOCK_BODY
+            SET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age$PiecemealHolder type:kotlin.Int visibility:private declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+              receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<set-age>' type=<root>.Person.Mutable origin=null
+              value: GET_VAR '<set-?>: kotlin.Int declared in <root>.Person.Mutable.<set-age>' type=kotlin.Int origin=null
+            SET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:age$PiecemealFlag type:kotlin.Boolean visibility:private declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+              receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<set-age>' type=<root>.Person.Mutable origin=null
+              value: CONST Boolean type=kotlin.Boolean value=true
+      PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name visibility:public modality:FINAL [var]
+        FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:<get-name> visibility:public modality:FINAL <> ($this:<root>.Person.Mutable) returnType:kotlin.String
+          correspondingProperty: PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Mutable
+          BLOCK_BODY
+            WHEN type=kotlin.String origin=null
+              BRANCH
+                if: GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name$PiecemealFlag type:kotlin.Boolean visibility:private declared in <root>.Person.Mutable' type=kotlin.Boolean origin=null
+                  receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<get-name>' type=<root>.Person.Mutable origin=null
+                then: RETURN type=kotlin.Nothing from='public final fun <get-name> (): kotlin.String declared in <root>.Person.Mutable'
+                  GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name$PiecemealHolder type:kotlin.String? visibility:private declared in <root>.Person.Mutable' type=kotlin.String? origin=null
+                    receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<get-name>' type=<root>.Person.Mutable origin=null
+              BRANCH
+                if: CONST Boolean type=kotlin.Boolean value=true
+                then: THROW type=kotlin.Nothing
+                  CONSTRUCTOR_CALL 'public constructor <init> (p0: @[FlexibleNullability] kotlin.String?) declared in java.lang.IllegalStateException' type=java.lang.IllegalStateException origin=null
+                    p0: CONST String type=kotlin.String value="Uninitialized property 'name'."
+        FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:<set-name> visibility:public modality:FINAL <> ($this:<root>.Person.Mutable, <set-?>:kotlin.String) returnType:kotlin.Unit
+          correspondingProperty: PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Mutable
+          VALUE_PARAMETER name:<set-?> index:0 type:kotlin.String
+          BLOCK_BODY
+            SET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name$PiecemealHolder type:kotlin.String? visibility:private declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+              receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<set-name>' type=<root>.Person.Mutable origin=null
+              value: GET_VAR '<set-?>: kotlin.String declared in <root>.Person.Mutable.<set-name>' type=kotlin.String origin=null
+            SET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:name$PiecemealFlag type:kotlin.Boolean visibility:private declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+              receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<set-name>' type=<root>.Person.Mutable origin=null
+              value: CONST Boolean type=kotlin.Boolean value=true
+      PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname visibility:public modality:FINAL [var]
+        FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:<get-nickname> visibility:public modality:FINAL <> ($this:<root>.Person.Mutable) returnType:kotlin.String?
+          correspondingProperty: PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Mutable
+          BLOCK_BODY
+            WHEN type=kotlin.String? origin=null
+              BRANCH
+                if: GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname$PiecemealFlag type:kotlin.Boolean visibility:private declared in <root>.Person.Mutable' type=kotlin.Boolean origin=null
+                  receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<get-nickname>' type=<root>.Person.Mutable origin=null
+                then: RETURN type=kotlin.Nothing from='public final fun <get-nickname> (): kotlin.String? declared in <root>.Person.Mutable'
+                  GET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname$PiecemealHolder type:kotlin.String? visibility:private declared in <root>.Person.Mutable' type=kotlin.String? origin=null
+                    receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<get-nickname>' type=<root>.Person.Mutable origin=null
+              BRANCH
+                if: CONST Boolean type=kotlin.Boolean value=true
+                then: THROW type=kotlin.Nothing
+                  CONSTRUCTOR_CALL 'public constructor <init> (p0: @[FlexibleNullability] kotlin.String?) declared in java.lang.IllegalStateException' type=java.lang.IllegalStateException origin=null
+                    p0: CONST String type=kotlin.String value="Uninitialized property 'nickname'."
+        FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:<set-nickname> visibility:public modality:FINAL <> ($this:<root>.Person.Mutable, <set-?>:kotlin.String?) returnType:kotlin.Unit
+          correspondingProperty: PROPERTY GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname visibility:public modality:FINAL [var]
+          $this: VALUE_PARAMETER name:<this> type:<root>.Person.Mutable
+          VALUE_PARAMETER name:<set-?> index:0 type:kotlin.String?
+          BLOCK_BODY
+            SET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname$PiecemealHolder type:kotlin.String? visibility:private declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+              receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<set-nickname>' type=<root>.Person.Mutable origin=null
+              value: GET_VAR '<set-?>: kotlin.String? declared in <root>.Person.Mutable.<set-nickname>' type=kotlin.String? origin=null
+            SET_FIELD 'FIELD GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:nickname$PiecemealFlag type:kotlin.Boolean visibility:private declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+              receiver: GET_VAR '<this>: <root>.Person.Mutable declared in <root>.Person.Mutable.<set-nickname>' type=<root>.Person.Mutable origin=null
+              value: CONST Boolean type=kotlin.Boolean value=true
+    CLASS GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] OBJECT name:Companion modality:FINAL visibility:public [companion] superTypes:[kotlin.Any]
+      $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:<root>.Person.Companion
+      CONSTRUCTOR GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] visibility:private <> () returnType:<root>.Person.Companion [primary]
+        BLOCK_BODY
+          DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> () declared in kotlin.Any'
+          INSTANCE_INITIALIZER_CALL classDescriptor='CLASS GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] OBJECT name:Companion modality:FINAL visibility:public [companion] superTypes:[kotlin.Any]'
+      FUN FAKE_OVERRIDE name:equals visibility:public modality:OPEN <> ($this:kotlin.Any, other:kotlin.Any?) returnType:kotlin.Boolean [fake_override,operator]
+        overridden:
+          public open fun equals (other: kotlin.Any?): kotlin.Boolean declared in kotlin.Any
+        $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+        VALUE_PARAMETER name:other index:0 type:kotlin.Any?
+      FUN FAKE_OVERRIDE name:hashCode visibility:public modality:OPEN <> ($this:kotlin.Any) returnType:kotlin.Int [fake_override]
+        overridden:
+          public open fun hashCode (): kotlin.Int declared in kotlin.Any
+        $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+      FUN FAKE_OVERRIDE name:toString visibility:public modality:OPEN <> ($this:kotlin.Any) returnType:kotlin.String [fake_override]
+        overridden:
+          public open fun toString (): kotlin.String declared in kotlin.Any
+        $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+      FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:build visibility:public modality:FINAL <> ($this:<root>.Person.Companion, builderAction:@[ExtensionFunctionType] kotlin.Function1<<root>.Person.Mutable, kotlin.Unit>) returnType:<root>.Person [inline]
+        $this: VALUE_PARAMETER name:<this> type:<root>.Person.Companion
+        VALUE_PARAMETER GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:builderAction index:0 type:@[ExtensionFunctionType] kotlin.Function1<<root>.Person.Mutable, kotlin.Unit>
+        BLOCK_BODY
+          VAR IR_TEMPORARY_VARIABLE name:tmp_3 type:<root>.Person.Mutable [val]
+            CONSTRUCTOR_CALL 'public constructor <init> () declared in <root>.Person.Mutable' type=<root>.Person.Mutable origin=null
+          CALL 'public abstract fun invoke (p1: P1 of kotlin.Function1): R of kotlin.Function1 declared in kotlin.Function1' type=R of kotlin.Function1 origin=null
+            $this: GET_VAR 'builderAction: @[ExtensionFunctionType] kotlin.Function1<<root>.Person.Mutable, kotlin.Unit> declared in <root>.Person.Companion.build' type=@[ExtensionFunctionType] kotlin.Function1<<root>.Person.Mutable, kotlin.Unit> origin=null
+            p1: GET_VAR 'val tmp_3: <root>.Person.Mutable declared in <root>.Person.Companion.build' type=<root>.Person.Mutable origin=null
+          RETURN type=kotlin.Nothing from='public final fun build (builderAction: @[ExtensionFunctionType] kotlin.Function1<<root>.Person.Mutable, kotlin.Unit>): <root>.Person declared in <root>.Person.Companion'
+            CALL 'public final fun build (): <root>.Person declared in <root>.Person.Mutable' type=<root>.Person origin=null
+              $this: GET_VAR 'val tmp_3: <root>.Person.Mutable declared in <root>.Person.Companion.build' type=<root>.Person.Mutable origin=null
+    CONSTRUCTOR visibility:private <> (name:kotlin.String, nickname:kotlin.String?, age:kotlin.Int) returnType:<root>.Person [primary]
+      VALUE_PARAMETER name:name index:0 type:kotlin.String
+      VALUE_PARAMETER name:nickname index:1 type:kotlin.String?
+        EXPRESSION_BODY
+          GET_VAR 'name: kotlin.String declared in <root>.Person.<init>' type=kotlin.String origin=null
+      VALUE_PARAMETER name:age index:2 type:kotlin.Int
+        EXPRESSION_BODY
+          CONST Int type=kotlin.Int value=0
+      BLOCK_BODY
+        DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> () declared in kotlin.Any'
+        INSTANCE_INITIALIZER_CALL classDescriptor='CLASS CLASS name:Person modality:FINAL visibility:public superTypes:[kotlin.Any]'
+    FUN FAKE_OVERRIDE name:equals visibility:public modality:OPEN <> ($this:kotlin.Any, other:kotlin.Any?) returnType:kotlin.Boolean [fake_override,operator]
+      overridden:
+        public open fun equals (other: kotlin.Any?): kotlin.Boolean declared in kotlin.Any
+      $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+      VALUE_PARAMETER name:other index:0 type:kotlin.Any?
+    FUN FAKE_OVERRIDE name:hashCode visibility:public modality:OPEN <> ($this:kotlin.Any) returnType:kotlin.Int [fake_override]
+      overridden:
+        public open fun hashCode (): kotlin.Int declared in kotlin.Any
+      $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+    FUN FAKE_OVERRIDE name:toString visibility:public modality:OPEN <> ($this:kotlin.Any) returnType:kotlin.String [fake_override]
+      overridden:
+        public open fun toString (): kotlin.String declared in kotlin.Any
+      $this: VALUE_PARAMETER name:<this> type:kotlin.Any
+    FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:copy visibility:public modality:FINAL <> ($this:<root>.Person, transform:@[ExtensionFunctionType] kotlin.Function1<<root>.Person.Mutable, kotlin.Unit>) returnType:<root>.Person [inline]
+      $this: VALUE_PARAMETER name:<this> type:<root>.Person
+      VALUE_PARAMETER GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:transform index:0 type:@[ExtensionFunctionType] kotlin.Function1<<root>.Person.Mutable, kotlin.Unit>
+      BLOCK_BODY
+        VAR IR_TEMPORARY_VARIABLE name:tmp_4 type:<root>.Person.Mutable [val]
+          CALL 'public final fun toMutable (): <root>.Person.Mutable declared in <root>.Person' type=<root>.Person.Mutable origin=null
+            $this: GET_VAR '<this>: <root>.Person declared in <root>.Person.copy' type=<root>.Person origin=null
+        CALL 'public abstract fun invoke (p1: P1 of kotlin.Function1): R of kotlin.Function1 declared in kotlin.Function1' type=R of kotlin.Function1 origin=null
+          $this: GET_VAR 'transform: @[ExtensionFunctionType] kotlin.Function1<<root>.Person.Mutable, kotlin.Unit> declared in <root>.Person.copy' type=@[ExtensionFunctionType] kotlin.Function1<<root>.Person.Mutable, kotlin.Unit> origin=null
+          p1: GET_VAR 'val tmp_4: <root>.Person.Mutable declared in <root>.Person.copy' type=<root>.Person.Mutable origin=null
+        RETURN type=kotlin.Nothing from='public final fun copy (transform: @[ExtensionFunctionType] kotlin.Function1<<root>.Person.Mutable, kotlin.Unit>): <root>.Person declared in <root>.Person'
+          CALL 'public final fun build (): <root>.Person declared in <root>.Person.Mutable' type=<root>.Person origin=null
+            $this: GET_VAR 'val tmp_4: <root>.Person.Mutable declared in <root>.Person.copy' type=<root>.Person.Mutable origin=null
+    FUN GENERATED[dev.bnorm.piecemeal.plugin.Piecemeal.Key] name:toMutable visibility:public modality:FINAL <> ($this:<root>.Person) returnType:<root>.Person.Mutable
+      $this: VALUE_PARAMETER name:<this> type:<root>.Person
+      BLOCK_BODY
+        VAR IR_TEMPORARY_VARIABLE name:tmp_5 type:<root>.Person.Mutable [val]
+          CONSTRUCTOR_CALL 'public constructor <init> () declared in <root>.Person.Mutable' type=<root>.Person.Mutable origin=null
+        CALL 'public final fun <set-name> (<set-?>: kotlin.String): kotlin.Unit declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+          $this: GET_VAR 'val tmp_5: <root>.Person.Mutable declared in <root>.Person.toMutable' type=<root>.Person.Mutable origin=null
+          <set-?>: CALL 'public final fun <get-name> (): kotlin.String declared in <root>.Person' type=kotlin.String origin=null
+            $this: GET_VAR '<this>: <root>.Person declared in <root>.Person.toMutable' type=<root>.Person origin=null
+        CALL 'public final fun <set-nickname> (<set-?>: kotlin.String?): kotlin.Unit declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+          $this: GET_VAR 'val tmp_5: <root>.Person.Mutable declared in <root>.Person.toMutable' type=<root>.Person.Mutable origin=null
+          <set-?>: CALL 'public final fun <get-nickname> (): kotlin.String? declared in <root>.Person' type=kotlin.String? origin=null
+            $this: GET_VAR '<this>: <root>.Person declared in <root>.Person.toMutable' type=<root>.Person origin=null
+        CALL 'public final fun <set-age> (<set-?>: kotlin.Int): kotlin.Unit declared in <root>.Person.Mutable' type=kotlin.Unit origin=null
+          $this: GET_VAR 'val tmp_5: <root>.Person.Mutable declared in <root>.Person.toMutable' type=<root>.Person.Mutable origin=null
+          <set-?>: CALL 'public final fun <get-age> (): kotlin.Int declared in <root>.Person' type=kotlin.Int origin=null
+            $this: GET_VAR '<this>: <root>.Person declared in <root>.Person.toMutable' type=<root>.Person origin=null
+        RETURN type=kotlin.Nothing from='public final fun toMutable (): <root>.Person.Mutable declared in <root>.Person'
+          GET_VAR 'val tmp_5: <root>.Person.Mutable declared in <root>.Person.toMutable' type=<root>.Person.Mutable origin=null
+  FUN name:box visibility:public modality:FINAL <> () returnType:kotlin.String
+    BLOCK_BODY
+      RETURN type=kotlin.Nothing from='public final fun box (): kotlin.String declared in <root>'
+        CONST String type=kotlin.String value="OK"

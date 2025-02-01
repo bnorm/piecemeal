@@ -3,8 +3,8 @@ import kotlin.test.assertEquals
 
 class SimpsonTest {
   @Test
-  fun testApplyBuilder() {
-    val simpson = Simpson.Builder().apply {
+  fun testApplyMutable() {
+    val simpson = Simpson.Mutable().apply {
       firstName = "Homer"
       lastName = "Simpson"
     }.build()

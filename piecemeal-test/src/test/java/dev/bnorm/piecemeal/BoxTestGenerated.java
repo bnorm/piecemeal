@@ -28,18 +28,6 @@ public class BoxTestGenerated extends AbstractBoxTest {
   }
 
   @Test
-  @TestMetadata("Builder.kt")
-  public void testBuilder() {
-    runTest("piecemeal-test/src/test/data/box/Builder.kt");
-  }
-
-  @Test
-  @TestMetadata("BuilderWithSetters.kt")
-  public void testBuilderWithSetters() {
-    runTest("piecemeal-test/src/test/data/box/BuilderWithSetters.kt");
-  }
-
-  @Test
   @TestMetadata("Copy.kt")
   public void testCopy() {
     runTest("piecemeal-test/src/test/data/box/Copy.kt");
@@ -49,5 +37,17 @@ public class BoxTestGenerated extends AbstractBoxTest {
   @TestMetadata("InlineBuild.kt")
   public void testInlineBuild() {
     runTest("piecemeal-test/src/test/data/box/InlineBuild.kt");
+  }
+
+  @Test
+  @TestMetadata("Mutable.kt")
+  public void testMutable() {
+    runTest("piecemeal-test/src/test/data/box/Mutable.kt");
+  }
+
+  @Test
+  @TestMetadata("MutableWithSetters.kt")
+  public void testMutableWithSetters() {
+    runTest("piecemeal-test/src/test/data/box/MutableWithSetters.kt");
   }
 }
