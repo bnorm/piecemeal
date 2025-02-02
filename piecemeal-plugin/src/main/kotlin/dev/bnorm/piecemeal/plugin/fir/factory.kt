@@ -21,21 +21,27 @@ import dev.bnorm.piecemeal.plugin.toJavaSetter
 import org.jetbrains.kotlin.contracts.description.EventOccurrencesRange
 import org.jetbrains.kotlin.contracts.description.KtValueParameterReference
 import org.jetbrains.kotlin.fir.FirSession
+import org.jetbrains.kotlin.fir.contracts.builder.FirResolvedContractDescriptionBuilder
 import org.jetbrains.kotlin.fir.contracts.builder.buildEffectDeclaration
 import org.jetbrains.kotlin.fir.contracts.builder.buildResolvedContractDescription
 import org.jetbrains.kotlin.fir.contracts.description.ConeCallsEffectDeclaration
+import org.jetbrains.kotlin.fir.declarations.FirContractDescriptionOwner
 import org.jetbrains.kotlin.fir.declarations.FirProperty
+import org.jetbrains.kotlin.fir.declarations.FirRegularClass
 import org.jetbrains.kotlin.fir.declarations.FirSimpleFunction
 import org.jetbrains.kotlin.fir.extensions.FirExtension
-import org.jetbrains.kotlin.fir.plugin.createConeType
-import org.jetbrains.kotlin.fir.plugin.createMemberFunction
-import org.jetbrains.kotlin.fir.plugin.createMemberProperty
+import org.jetbrains.kotlin.fir.plugin.*
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
+import org.jetbrains.kotlin.fir.resolve.substitution.ConeSubstitutor
+import org.jetbrains.kotlin.fir.resolve.substitution.substitutorByMap
+import org.jetbrains.kotlin.fir.scopes.impl.toConeType
+import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirValueParameterSymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.name.*
+import org.jetbrains.kotlin.types.Variance
 
 val MUTABLE_CLASS_NAME = Name.identifier("Mutable")
 
@@ -48,7 +54,7 @@ val FUNCTION1 = ClassId(FqName("kotlin"), Name.identifier("Function1"))
 val ClassId.mutable: ClassId get() = createNestedClassId(MUTABLE_CLASS_NAME)
 val ClassId.companion: ClassId get() = createNestedClassId(SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT)
 
-fun Name.toParameterName(): Name {
+private fun Name.toParameterName(): Name {
   return asString().removePrefix("set").let { name ->
     Name.identifier(name[0].lowercase() + name.substring(1))
   }
@@ -57,17 +63,77 @@ fun Name.toParameterName(): Name {
 fun FirSession.findClassSymbol(classId: ClassId) =
   symbolProvider.getClassLikeSymbolByClassId(classId) as? FirClassSymbol
 
-fun fun1Ext(
+private fun fun1Ext(
   session: FirSession,
-  receiver: FirClassSymbol<*>,
+  receiverType: ConeClassLikeType,
 ): ConeClassLikeType {
   return FUNCTION1.createConeType(
     session = session,
     typeArguments = arrayOf(
-      receiver.constructStarProjectedType(),
+      receiverType,
       session.builtinTypes.unitType.coneType,
     )
   ).withAttributes(ConeAttributes.create(listOf(CompilerConeAttributes.ExtensionFunctionType)))
+}
+
+private fun FirContractDescriptionOwner.replaceContractDescription(
+  init: FirResolvedContractDescriptionBuilder.() -> Unit = {},
+) {
+  replaceContractDescription(
+    buildResolvedContractDescription {
+      init()
+    }
+  )
+}
+
+private fun FirResolvedContractDescriptionBuilder.callsInPlaceExactlyOnce(
+  parameterIndex: Int,
+  name: String,
+) {
+  effects += buildEffectDeclaration {
+    effect = ConeCallsEffectDeclaration(
+      valueParameterReference = KtValueParameterReference(parameterIndex, name),
+      kind = EventOccurrencesRange.EXACTLY_ONCE,
+    )
+  }
+}
+
+private fun DeclarationBuildingContext<*>.copyTypeParametersFrom(
+  piecemealClassSymbol: FirClassSymbol<*>,
+  session: FirSession,
+) {
+  for (parameter in piecemealClassSymbol.typeParameterSymbols) {
+    typeParameter(
+      name = parameter.name,
+      variance = Variance.INVARIANT, // Type must always be invariant to support read and write access.
+    ) {
+      for (bound in parameter.resolvedBounds) {
+        bound { typeParameters ->
+          val arguments = typeParameters.map { it.toConeType() }
+          val substitutor = substitutor(piecemealClassSymbol, arguments, session)
+          substitutor.substituteOrSelf(bound.coneType)
+        }
+      }
+    }
+  }
+}
+
+private fun substitutor(
+  piecemealClassSymbol: FirClassLikeSymbol<*>,
+  mutableClassSymbol: FirClassLikeSymbol<*>,
+  session: FirSession,
+): ConeSubstitutor {
+  val builderArguments = mutableClassSymbol.typeParameterSymbols.map { it.toConeType() }
+  return substitutor(piecemealClassSymbol, builderArguments, session)
+}
+
+private fun substitutor(
+  piecemealClassSymbol: FirClassLikeSymbol<*>,
+  builderArguments: List<ConeKotlinType>,
+  session: FirSession,
+): ConeSubstitutor {
+  val piecemealParameters = piecemealClassSymbol.typeParameterSymbols
+  return substitutorByMap(piecemealParameters.zip(builderArguments).toMap(), session)
 }
 
 fun getPrimaryConstructorValueParameters(
@@ -80,17 +146,26 @@ fun getPrimaryConstructorValueParameters(
   return outerPrimaryConstructor.valueParameterSymbols
 }
 
+fun FirExtension.generateBuilderClass(
+  piecemealClassSymbol: FirClassSymbol<*>,
+): FirRegularClass {
+  return createNestedClass(piecemealClassSymbol, MUTABLE_CLASS_NAME, Piecemeal.Key) {
+    copyTypeParametersFrom(piecemealClassSymbol, session)
+  }
+}
+
 fun FirExtension.createFunToMutable(
   piecemealClassSymbol: FirClassSymbol<*>,
   callableId: CallableId,
 ): FirSimpleFunction? {
   val piecemealClassId = callableId.classId ?: return null
   val mutableClassSymbol = session.findClassSymbol(piecemealClassId.mutable) ?: return null
+  val typeArguments = piecemealClassSymbol.typeParameterSymbols.map { it.toConeType() }
   return createMemberFunction(
     owner = piecemealClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
-    returnType = mutableClassSymbol.constructStarProjectedType(),
+    returnType = mutableClassSymbol.constructType(typeArguments.toTypedArray())
   )
 }
 
@@ -100,31 +175,26 @@ fun FirExtension.createFunCopy(
 ): FirSimpleFunction? {
   val piecemealClassId = piecemealClassSymbol.classId
   val mutableClassSymbol = session.findClassSymbol(piecemealClassId.mutable) ?: return null
+  val typeArguments = piecemealClassSymbol.typeParameterSymbols.map { it.toConeType() }
+
   val parameterName = "transform"
   return createMemberFunction(
     owner = piecemealClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
-    returnType = piecemealClassSymbol.constructStarProjectedType(),
+    returnType = piecemealClassSymbol.constructType(typeArguments.toTypedArray()),
   ) {
     status {
       isInline = true
     }
     valueParameter(
       name = Name.identifier(parameterName),
-      type = fun1Ext(session, receiver = mutableClassSymbol),
+      type = fun1Ext(session, receiverType = mutableClassSymbol.constructType(typeArguments.toTypedArray())),
     )
   }.apply {
-    replaceContractDescription(
-      newContractDescription = buildResolvedContractDescription {
-        effects += buildEffectDeclaration {
-          effect = ConeCallsEffectDeclaration(
-            valueParameterReference = KtValueParameterReference(0, parameterName),
-            kind = EventOccurrencesRange.EXACTLY_ONCE,
-          )
-        }
-      },
-    )
+    replaceContractDescription {
+      callsInPlaceExactlyOnce(parameterIndex = 0, name = parameterName)
+    }
   }
 }
 
@@ -134,11 +204,12 @@ fun FirExtension.createFunMutableBuild(
 ): FirSimpleFunction? {
   val piecemealClassId = mutableClassSymbol.classId.outerClassId!!
   val piecemealClassSymbol = session.findClassSymbol(piecemealClassId)!!
+  val typeArguments = mutableClassSymbol.typeParameterSymbols.map { it.toConeType() }
   return createMemberFunction(
     owner = mutableClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
-    returnType = piecemealClassSymbol.constructStarProjectedType(),
+    returnType = piecemealClassSymbol.constructType(typeArguments.toTypedArray()),
   )
 }
 
@@ -148,15 +219,21 @@ fun FirExtension.createFunMutableSetter(
 ): FirSimpleFunction? {
   val piecemealClassId = mutableClassSymbol.classId.outerClassId!!
   val piecemealClassSymbol = session.findClassSymbol(piecemealClassId)!!
+  val typeArguments = mutableClassSymbol.typeParameterSymbols.map { it.toConeType() }
+
   val parameterSymbol = getPrimaryConstructorValueParameters(piecemealClassSymbol)
     .singleOrNull { it.name.toJavaSetter() == callableId.callableName } ?: return null
+  val substitutor = substitutor(piecemealClassSymbol, mutableClassSymbol, session)
   return createMemberFunction(
     owner = mutableClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
-    returnType = mutableClassSymbol.constructStarProjectedType(),
+    returnType = mutableClassSymbol.constructType(typeArguments.toTypedArray()),
   ) {
-    valueParameter(callableId.callableName.toParameterName(), parameterSymbol.resolvedReturnType)
+    valueParameter(
+      name = callableId.callableName.toParameterName(),
+      type = substitutor.substituteOrSelf(parameterSymbol.resolvedReturnType),
+    )
   }
 }
 
@@ -169,16 +246,15 @@ fun FirExtension.createPropertyMutableValue(
 
   val parameter = getPrimaryConstructorValueParameters(piecemealClassSymbol)
     .singleOrNull { it.name == callableId.callableName } ?: return null
-  val property = createMemberProperty(
+  val substitutor = substitutor(piecemealClassSymbol, mutableClassSymbol, session)
+  return createMemberProperty(
     owner = mutableClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
-    returnType = parameter.resolvedReturnType,
+    returnType = substitutor.substituteOrSelf(parameter.resolvedReturnType),
     isVal = false,
     hasBackingField = false,
   )
-
-  return property
 }
 
 fun FirExtension.createFunPiecemealDsl(
@@ -188,23 +264,32 @@ fun FirExtension.createFunPiecemealDsl(
   val piecemealClassId = companionClassSymbol.classId.outerClassId!!
   val piecemealClassSymbol = session.findClassSymbol(piecemealClassId)!!
   val mutableClassSymbol = session.findClassSymbol(piecemealClassId.mutable) ?: return null
-  val builderActionType = fun1Ext(session, receiver = mutableClassSymbol)
+
   val paramName = "builderAction"
   return createMemberFunction(
     owner = companionClassSymbol,
     key = Piecemeal.Key,
     name = callableId.callableName,
-    returnType = piecemealClassSymbol.constructStarProjectedType(),
+    returnTypeProvider = { typeParameters ->
+      piecemealClassSymbol.constructType(typeParameters.map { it.toConeType() }.toTypedArray())
+    },
   ) {
     status {
       isInline = true
     }
-    valueParameter(Name.identifier(paramName), builderActionType)
+
+    copyTypeParametersFrom(piecemealClassSymbol, session)
+
+    valueParameter(
+      name = Name.identifier(paramName),
+      typeProvider = { typeParameters ->
+        val builderType = mutableClassSymbol.constructType(typeParameters.map { it.toConeType() }.toTypedArray())
+        fun1Ext(session, receiverType = builderType)
+      },
+    )
   }.apply {
-    replaceContractDescription(buildResolvedContractDescription {
-      effects += buildEffectDeclaration {
-        effect = ConeCallsEffectDeclaration(KtValueParameterReference(0, paramName), EventOccurrencesRange.EXACTLY_ONCE)
-      }
-    })
+    replaceContractDescription {
+      callsInPlaceExactlyOnce(parameterIndex = 0, name = paramName)
+    }
   }
 }

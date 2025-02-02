@@ -1,0 +1,11 @@
+* text eol=lf
+
+# Windows
+*.bat text eol=crlf
+
+# Binary
+*.jar binary
+
+# Generated files
+piecemeal-tests/src/test/java/**/*.java linguist-generated
+**/yarn.lock                            linguist-generated
