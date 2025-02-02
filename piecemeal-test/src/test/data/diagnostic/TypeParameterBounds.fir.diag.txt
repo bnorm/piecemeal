@@ -1,0 +1,25 @@
+/TypeParameterBounds.kt:(452,459): error: Type argument is not within its bounds: should be subtype of 'kotlin.Any'.
+
+/TypeParameterBounds.kt:(461,473): error: Type argument is not within its bounds: should be subtype of 'kotlin.String?'.
+
+/TypeParameterBounds.kt:(475,478): error: Type argument is not within its bounds: should be subtype of 'it(kotlin.Comparable<kotlin.Any> & kotlin.CharSequence)'.
+
+/TypeParameterBounds.kt:(524,531): error: Type argument is not within its bounds: should be subtype of 'kotlin.Any'.
+
+/TypeParameterBounds.kt:(533,545): error: Type argument is not within its bounds: should be subtype of 'kotlin.String?'.
+
+/TypeParameterBounds.kt:(547,550): error: Type argument is not within its bounds: should be subtype of 'it(kotlin.Comparable<kotlin.Any> & kotlin.CharSequence)'.
+
+/TypeParameterBounds.kt:(552,554): error: Argument type mismatch: actual type is 'kotlin.Function1<Thing.Mutable<kotlin.String?, kotlin.CharSequence, kotlin.Any>, kotlin.Unit>', but 'kotlin.Function1<Thing.Mutable<T1, T2, T3>, kotlin.Unit>' was expected.
+
+/TypeParameterBounds.kt:(652,680): error: No type arguments expected for fun toMutable(): Thing.Mutable<String, String, String>.
+
+/TypeParameterBounds.kt:(770,798): error: No type arguments expected for fun copy(transform: Thing.Mutable<String, String, String>.() -> Unit): Thing<String, String, String>.
+
+/TypeParameterBounds.kt:(930,950): error: Initializer type mismatch: expected 'Producer.Mutable<kotlin.CharSequence>', actual 'Producer.Mutable<kotlin.String>'.
+
+/TypeParameterBounds.kt:(930,950): error: Type mismatch: inferred type is 'Producer.Mutable<kotlin.String>', but 'Producer.Mutable<kotlin.CharSequence>' was expected.
+
+/TypeParameterBounds.kt:(1210,1230): error: Initializer type mismatch: expected 'Consumer.Mutable<kotlin.String>', actual 'Consumer.Mutable<kotlin.CharSequence>'.
+
+/TypeParameterBounds.kt:(1210,1230): error: Type mismatch: inferred type is 'Consumer.Mutable<kotlin.CharSequence>', but 'Consumer.Mutable<kotlin.String>' was expected.

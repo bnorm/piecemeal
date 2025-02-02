@@ -43,4 +43,10 @@ public class DiagnosticTestGenerated extends AbstractDiagnosticTest {
   public void testPrimaryConstructorVisibility() {
     runTest("piecemeal-test/src/test/data/diagnostic/PrimaryConstructorVisibility.kt");
   }
+
+  @Test
+  @TestMetadata("TypeParameterBounds.kt")
+  public void testTypeParameterBounds() {
+    runTest("piecemeal-test/src/test/data/diagnostic/TypeParameterBounds.kt");
+  }
 }

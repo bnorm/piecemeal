@@ -24,13 +24,11 @@ import org.jetbrains.kotlin.fir.extensions.*
 import org.jetbrains.kotlin.fir.plugin.createCompanionObject
 import org.jetbrains.kotlin.fir.plugin.createConstructor
 import org.jetbrains.kotlin.fir.plugin.createDefaultPrivateConstructor
-import org.jetbrains.kotlin.fir.plugin.createNestedClass
 import org.jetbrains.kotlin.fir.symbols.impl.*
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 
-@OptIn(ExperimentalTopLevelDeclarationsGenerationApi::class)
 class PiecemealFirGenerationExtension(
   session: FirSession,
 ) : FirDeclarationGenerationExtension(session) {
@@ -179,7 +177,7 @@ class PiecemealFirGenerationExtension(
     if (owner !is FirRegularClassSymbol) return null
     if (owner !in piecemealClasses) return null
     return when (name) {
-      MUTABLE_CLASS_NAME -> createNestedClass(owner, name, Piecemeal.Key).symbol
+      MUTABLE_CLASS_NAME -> generateBuilderClass(owner).symbol
       SpecialNames.DEFAULT_NAME_FOR_COMPANION_OBJECT -> generateCompanionDeclaration(owner)
       else -> error("Can't generate class ${owner.classId.createNestedClassId(name).asSingleFqName()}")
     }

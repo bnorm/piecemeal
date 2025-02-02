@@ -50,4 +50,10 @@ public class BoxTestGenerated extends AbstractBoxTest {
   public void testMutableWithSetters() {
     runTest("piecemeal-test/src/test/data/box/MutableWithSetters.kt");
   }
+
+  @Test
+  @TestMetadata("TypeParameter.kt")
+  public void testTypeParameter() {
+    runTest("piecemeal-test/src/test/data/box/TypeParameter.kt");
+  }
 }
